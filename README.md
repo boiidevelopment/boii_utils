@@ -9,6 +9,12 @@ The aim here is just to create a large consolidated resource to handle the major
 A lot of the current functions have been tested and are working, however a large portion still has not been tested. 
 Any issues with any part of this resource please let us know through an issue or within discord and we can get those changes made asap.
 
+### Documentation
+
+https://docs.boii.dev/fivem/free-resources/boii_utils 
+
+-- NOTE: The docs are still being worked on and things may not be accurate to the current state of the resource please be aware of this.
+
 ### Install
 
 1. Edit the `server/config.lua` currently this is only for sql and groups stuff more will be added.
