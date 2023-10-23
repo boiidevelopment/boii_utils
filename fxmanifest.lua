@@ -24,6 +24,7 @@ shared_scripts {
     'shared/validation.lua',
     'shared/networking.lua',
     'shared/serialization.lua',
+    'shared/test_commands.lua',
     'shared/exports.lua',
 }
 
@@ -49,4 +50,5 @@ client_scripts {
     'client/environment.lua',
     'client/developer.lua',
     'client/groups.lua',
+    'client/test_commands.lua',
 }
