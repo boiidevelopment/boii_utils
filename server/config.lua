@@ -1,12 +1,36 @@
+----------------------------------
+--<!>-- BOII | DEVELOPMENT --<!>--
+----------------------------------
+
+
 config_sv = config_sv or {}
 
 -- SQL settings
 config_sv.sql = {
-    wrapper = 'custom', -- Available options: 'oxmysql', 'mysql-async', 'ghmattimysql', 'custom'
+    wrapper = 'oxmysql', -- Available options: 'oxmysql', 'mysql-async', 'ghmattimysql', 'custom'
 }
 
 -- Group settings
 config_sv.groups = {
     max_groups = 1, -- Maximum amount of groups a play can be in at once
     max_members = 6, -- Default max amount of members who can join a group
+}
+
+-- Skills settings
+config_sv.skills = {
+    sql = {
+        ['table_name'] = 'player_skills'
+    },
+    skill_list = {
+        ['driving'] = { 
+            ['id'] = 'driving', -- ID used to match skill
+            ['category'] = 'base',  -- Category used to categorize different skill types
+            ['label'] = 'Driving', -- Human readable label for the skill
+            ['level'] = 1, -- Level players will start at
+            ['start_xp'] = 0, -- Amount of xp players will start with
+            ['first_level_xp'] = 1000, -- Amount of XP required for the first level
+            ['growth_factor'] = 1.5, -- Growth factor to increase XP per level based on first level xp default; level 1 -> 2 = 1000xp, 2 -> 3 = 1500xp, 3 -> 4 = 2250xp, 4 -> 5 = 3375xp.. and so on
+            ['max_level'] = 10  -- Max level players can achieve for skill
+        }
+    }
 }
