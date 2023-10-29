@@ -9,7 +9,7 @@ author 'boiidevelopment'
 
 description 'BOII | Development - Utility Library'
 
-version '0.0.1'
+version '0.0.2'
 
 lua54 'yes'
 
@@ -24,19 +24,23 @@ shared_scripts {
     'shared/validation.lua',
     'shared/networking.lua',
     'shared/serialization.lua',
+    'shared/frameworks.lua',
     'shared/test_commands.lua',
     'shared/exports.lua',
 }
 
 server_scripts {
-    --'@mysql-async/lib/MySQL.lua',
+    '@oxmysql/lib/MySQL.lua',
     'server/config.lua',
     'server/date_time.lua',
     'server/database.lua',
     'server/networking.lua',
     'server/scopes.lua',
     'server/buckets.lua',
+    'server/frameworks.lua',
+    'server/callbacks.lua',
     'server/groups.lua',
+    'server/skills.lua',
 }
 
 client_scripts {
@@ -50,5 +54,7 @@ client_scripts {
     'client/environment.lua',
     'client/developer.lua',
     'client/groups.lua',
+    'client/callbacks.lua',
+    'client/skills.lua',
     'client/test_commands.lua',
 }
