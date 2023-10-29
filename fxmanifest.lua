@@ -14,7 +14,7 @@ version '0.0.2'
 lua54 'yes'
 
 shared_scripts {
-    'shared/init.lua',
+    'shared/config.lua',
     'shared/debug.lua',
     'shared/general.lua',
     'shared/geometry.lua',
