@@ -2,7 +2,6 @@
 --<!>-- BOII | DEVELOPMENT --<!>--
 ----------------------------------
 
-
 config_sv = config_sv or {}
 
 -- SQL settings
