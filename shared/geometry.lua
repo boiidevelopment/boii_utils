@@ -197,6 +197,41 @@ local function distance_point_to_plane(point, plane_point, plane_normal)
     return math.abs(dist)
 end
 
+-- Convert a rotation vector to a direction vector
+-- `rotation` is a vector3 representing rotation in Euler angles (pitch, yaw, roll) in degrees
+-- Usage: local dir = rotation_to_direction({x = 0, y = 0, z = 90}) -- Converts a 90-degree z-rotation to a direction vector
+local function rotation_to_direction(rotation)
+    local z = math.rad(rotation.z)
+    local x = math.rad(rotation.x)
+    local num = math.abs(math.cos(x))
+    return vector3(
+        -math.sin(z) * num,
+        math.cos(z) * num,
+        math.sin(x)
+    )
+end
+
+-- Rotate a box around a central point in 3D by a given heading
+-- This function assumes the box is defined by its center, width, length, and the heading
+local function rotate_box(center, width, length, heading)
+    local half_width = width / 2
+    local half_length = length / 2
+    local rad = math.rad(heading)
+    local sin_heading = math.sin(rad)
+    local cos_heading = math.cos(rad)
+    local corners = {
+        {x = center.x + cos_heading * half_length + sin_heading * half_width, y = center.y + sin_heading * half_length - cos_heading * half_width},
+        {x = center.x - cos_heading * half_length + sin_heading * half_width, y = center.y - sin_heading * half_length - cos_heading * half_width},
+        {x = center.x - cos_heading * half_length - sin_heading * half_width, y = center.y - sin_heading * half_length + cos_heading * half_width},
+        {x = center.x + cos_heading * half_length - sin_heading * half_width, y = center.y + sin_heading * half_length + cos_heading * half_width},
+    }
+    local rotated_corners = {}
+    for _, corner in ipairs(corners) do
+        rotated_corners[#rotated_corners + 1] = vector3(corner.x, corner.y, center.z)
+    end
+    return rotated_corners
+end
+
 --[[
     ASSIGN LOCAL FUNCTIONS
 ]]
@@ -224,3 +259,5 @@ utils.geometry.do_spheres_intersect = do_spheres_intersect
 utils.geometry.is_point_in_convex_polygon = is_point_in_convex_polygon
 utils.geometry.rotate_point_around_point_2d = rotate_point_around_point_2d
 utils.geometry.distance_point_to_plane = distance_point_to_plane
+utils.geometry.rotation_to_direction = rotation_to_direction
+utils.geometry.rotate_box = rotate_box
