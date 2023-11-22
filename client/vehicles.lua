@@ -304,6 +304,188 @@ local function get_vehicle_details(use_current_vehicle)
     return vehicle_data
 end
 
+-- Function to spawn a vehicle with specified properties and modifications.
+-- Usage: spawn_vehicle(spawn_vehicle_data)
+--[[
+local spawn_vehicle_data = {
+    model = 'adder', -- Vehicle model name
+    coords = vector4(0.0, 0.0, 0.0, 0.0), -- Coordinates and heading for spawn
+    is_network = false, -- Whether the vehicle is networked
+    net_mission_entity = false, -- Whether the vehicle is a mission entity
+    -- Optional data
+    -- set_into_vehicle = true, -- Whether to set the player into a vehicle or not
+    -- custom_plate = 'TEST VEH', -- Custom vehicle plate set if specified
+    -- lock_doors = true, -- Whether vehicle doors should be locked or not
+    -- invincible = false, -- Whether the vehicle should be invincible or not
+    -- damages = { -- Remove to not apply any damages
+        -- doors = { -- Remove this section to not damage any doors
+            -- ids = {0, 1} -- IDs of doors to break
+            -- all = true -- Uncomment to break all doors
+            -- random = true -- Uncomment to randomly break some doors
+        -- },
+        -- windows = true, -- Set to true to break all windows // SmashVehicleWindow seems to just smash every window on spawn so this is just a boolean toggle
+        -- tyres = { -- Remove this section to not damage any tyres
+            -- ids = {0, 1}, -- IDs of tyres to burst
+            -- burst_completely = true -- Set to true to completely burst the tyres
+            -- all = true -- Uncomment to burst all tyres
+            -- random = true -- Uncomment to randomly burst some tyres
+        -- }
+    -- },
+    -- maintenance = { -- Remove to apply default maintenance
+        -- fuel = 100.0, -- Set the fuel level of the vehicle (range from 0.0 to 100.0). Remove to use default value.
+        -- oil = 1000.0, -- Set the oil level of the vehicle. Higher values represent better condition. Remove for default.
+        -- engine = 1000.0, -- Set the engine health of the vehicle (range from -4000.0 to 1000.0). Remove to use default value.
+        -- body = 1000.0, -- Set the body health of the vehicle (range from 0.0 to 1000.0). Remove for default condition.
+        -- clutch = 1000.0, -- Set the clutch health of the vehicle. Higher values represent better condition. Remove for default.
+        -- petrol_tank = 1000.0, -- Set the petrol tank health of the vehicle. Higher values are better. Remove for default.
+        -- dirt = 0.0, -- Set the dirt level on the vehicle (range from 0.0 for clean to 15.0 for very dirty). Remove for default.
+    -- },
+    -- mods = { -- Remove to spawn default vehicle
+        -- random = false, -- Set to true to apply random mods
+        -- max_performance = true -- Set to true to apply max performance mods
+        -- ids = { [15] = 2, [16] = 4 }, -- Specific mods to apply
+        -- custom_paint = { -- Remove to apply default paint
+            -- primary = { r = 255, g = 0, b = 0 }, -- Primary colour rgb
+            -- secondary = { r = 0, g = 255, b = 0 }  -- Secondary colour rgb
+        -- },
+        -- neon_lights = { -- Remove to not apply neons
+            -- colour = { r = 255, g = 255, b = 255 } -- Custom neon colour
+        -- },
+        -- xenon_lights = { -- Remove to not apply xenons
+            -- colour = 2 -- Xenon light colour index
+        -- },
+        -- bulletproof_tyres = true, -- Wether vehicle has bullet proof tyres or not
+        -- engine_audio = "ADDER", -- Custom engine sound for vehicle
+        -- top_speed = 156, -- Set top speed of vehicle
+        -- livery = 2, -- Set a livery if available
+        -- plate_style = 3, -- Set the plate style for the vehicle
+        -- window_tint = 3, -- Set the vehicles window tint
+        -- handling_tweaks = { -- Remove to apply default handling
+            -- ['fSuspensionHeight'] = -1.0, -- Lower the vehicle closer to the ground
+            -- ['fBrakeForce'] = 1.5, -- Increase brake force
+            -- ['fTractionCurveMax'] = 2.5, -- Improve maximal traction
+            -- ['fTractionCurveMin'] = 1.5, -- Improve minimal traction
+            -- ['fTractionCurveLateral'] = 2.0, -- Improve lateral traction
+            -- ['fInitialDriveForce'] = 2.0, -- Increase acceleration
+            -- ['fDriveBiasFront'] = 0.5, -- Distribute power evenly between front and back
+        -- },
+    -- }
+}
+]]
+local function spawn_vehicle(vehicle_data)
+    local model = vehicle_data.model
+    local coords = vehicle_data.coords
+    local is_network = vehicle_data.is_network
+    local net_mission_entity = vehicle_data.net_mission_entity
+    local hash = GetHashKey(model)
+    utils.requests.model(hash)
+    local vehicle = CreateVehicle(hash, coords.x, coords.y, coords.z, coords.w, is_network, net_mission_entity)
+    if vehicle_data.custom_plate then
+        SetVehicleNumberPlateText(vehicle, vehicle_data.custom_plate)
+    end
+    if vehicle_data.damages then
+        if damages.doors then
+            for _, doorId in ipairs(damages.doors.ids) do
+                SetVehicleDoorBroken(vehicle, doorId, true)
+            end
+        end
+        if damages.windows then
+            for i = 0, 7 do
+                SmashVehicleWindow(vehicle, i)
+            end
+        end
+        if damages.tyres then
+            for _, tyreId in ipairs(damages.tyres.ids) do
+                SetVehicleTyreBurst(vehicle, tyreId, damages.tyres.burst_completely, 1000)
+            end
+        end
+    end
+    if vehicle_data.maintenance then
+        local m = vehicle_data.maintenance
+        SetVehicleFuelLevel(vehicle, m.fuel or 100.0)
+        SetVehicleOilLevel(vehicle, m.oil or 1000.0)
+        SetVehicleEngineHealth(vehicle, m.engine or 1000.0)
+        SetVehicleBodyHealth(vehicle, m.body or 1000.0)
+        SetVehiclePetrolTankHealth(vehicle, m.petrol_tank or 1000.0)
+        SetVehicleDirtLevel(vehicle, m.dirt or 0.0)
+    end
+    if vehicle_data.mods then
+        if vehicle_data.mods.random then
+            for mod_type = 0, 49 do
+                local max = GetNumVehicleMods(vehicle, mod_type)
+                SetVehicleMod(vehicle, mod_type, math.random(0, max - 1), false)
+            end
+        end
+        if vehicle_data.mods.max_performance then
+            for mod_type = 0, 49 do
+                local max = GetNumVehicleMods(vehicle, mod_type)
+                SetVehicleMod(vehicle, mod_type, max - 1, false)
+            end
+        end
+        if vehicle_data.mods.ids then
+            for mod_type, modIndex in pairs(mods.ids) do
+                SetVehicleMod(vehicle, mod_type, modIndex, false)
+            end
+        end
+        if vehicle_data.mods.custom_paint then
+            local cp = vehicle_data.mods.custom_paint
+            if cp.primary then
+                SetVehicleCustomPrimaryColour(vehicle, cp.primary.r, cp.primary.g, cp.primary.b)
+            end
+            if cp.secondary then
+                SetVehicleCustomSecondaryColour(vehicle, cp.secondary.r, cp.secondary.g, cp.secondary.b)
+            end
+        end
+        if vehicle_data.mods.neon_lights then
+            for i = 0, 3 do
+                SetVehicleNeonLightEnabled(vehicle, i, true)
+            end
+            SetVehicleNeonLightsColour(vehicle, vehicle_data.mods.neon_lights.colour.r, vehicle_data.mods.neon_lights.colour.g, vehicle_data.mods.neon_lights.colour.b)
+        end
+        if vehicle_data.mods.xenon_lights then
+            ToggleVehicleMod(vehicle, 22, true)
+            if vehicle_data.mods.xenon_lights.colour then
+                SetVehicleHeadlightsColour(vehicle, vehicle_data.mods.xenon_lights.colour)
+            end
+        end
+        if vehicle_data.mods.bulletproof_tyres then
+            SetVehicleTyresCanBurst(vehicle, false)
+        end
+        if vehicle_data.mods.engine_audio then
+            ForceVehicleEngineAudio(vehicle, vehicle_data.mods.engine_audio)
+        end
+        if vehicle_data.mods.livery then
+            SetVehicleLivery(vehicle, vehicle_data.mods.livery)
+        end
+        if vehicle_data.mods.plate_style then
+            SetVehicleNumberPlateTextIndex(vehicle, vehicle_data.mods.plate_style)
+        end
+        if vehicle_data.mods.window_tint then
+            SetVehicleWindowTint(vehicle, vehicle_data.mods.window_tint)
+        end
+        if vehicle_data.mods.top_speed then
+            SetVehicleEnginePowerMultiplier(vehicle, vehicle_data.mods.top_speed)
+        end
+        if vehicle_data.mods.handling_tweaks then
+            for property, value in pairs(vehicle_data.mods.handling_tweaks) do
+                SetVehicleHandlingFloat(vehicle, "CHandlingData", property, value)
+            end
+        end
+    end
+    if vehicle_data.lock_doors then
+        SetVehicleDoorsLocked(vehicle, 2)
+    end
+    if vehicle_data.invincible then
+        SetEntityInvincible(vehicle, true)
+    end
+    PlaceObjectOnGroundProperly(vehicle)
+    if vehicle_data.set_into_vehicle then
+        local playerPed = PlayerPedId()
+        SetPedIntoVehicle(playerPed, vehicle, -1)
+    end
+    return vehicle
+end
+
 --[[
     ASSIGN LOCALS
 ]]
@@ -323,3 +505,4 @@ utils.vehicles.get_vehicle_mods_and_maintenance = get_vehicle_mods_and_maintenan
 utils.vehicles.get_vehicle_class = get_vehicle_class
 utils.vehicles.get_vehicle_class_details = get_vehicle_class_details
 utils.vehicles.get_vehicle_details = get_vehicle_details
+utils.vehicles.spawn_vehicle = spawn_vehicle
