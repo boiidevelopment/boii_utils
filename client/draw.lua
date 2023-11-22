@@ -175,6 +175,58 @@ local function box(params)
     DrawBox(start_coords.x, start_coords.y, start_coords.z, end_coords.x, end_coords.y, end_coords.z, table.unpack(colour))
 end
 
+-- Draws a rotated 3D box using lines between the calculated corners after rotation
+-- Usage:
+--[[
+    local center = vector3(0, 0, 0) -- The center of the box
+    local width = 5.0 -- The width of the box
+    local length = 10.0 -- The length of the box
+    local heading = 45.0 -- The heading for the box rotation in degrees
+    local colour = {255, 0, 0, 255} -- RGBA color for the box lines
+    local rotated_corners = rotate_box(center, width, length, heading)
+    draw_rotated_box(rotated_corners, colour)
+]]
+local function draw_rotated_box(corners, colour)
+    if not (type(corners) == 'table' and #corners > 0) then
+        return utils.debugging.warn("Invalid corners table provided to utils.draw.draw_rotated_box function.")
+    end
+    if not (type(colour) == 'table' and #colour == 4) then
+        return utils.debugging.warn("Invalid colour table provided to utils.draw.draw_rotated_box function.")
+    end
+    for i=1, #corners do
+        local next_index = i % #corners + 1
+        DrawLine(corners[i].x, corners[i].y, corners[i].z, corners[next_index].x, corners[next_index].y, corners[next_index].z, colour[1], colour[2], colour[3], colour[4])
+    end
+end
+
+-- Draws a 3D cuboid around a point in space based on given dimensions and heading
+-- Usage:
+--[[
+    local center = vector3(0, 0, 0) -- The center of the cuboid
+    local dimensions = {width = 5.0, length = 10.0, height = 3.0} -- example dimensions
+    local heading = 45.0 -- The heading for the cuboid in degrees
+    local colour = {255, 0, 0, 255} -- RGBA color for the cuboid edges
+    draw_3d_cuboid(center, dimensions, heading, colour)
+]]
+local function draw_3d_cuboid(center, dimensions, heading, colour)
+    if not center or not dimensions or not colour then
+        return utils.debugging.warn("Invalid parameters provided to utils.draw.draw_3d_cuboid function.")
+    end
+    local bottom_center = vector3(center.x, center.y, center.z - dimensions.height / 2)
+    local bottom_corners = utils.geometry.rotate_box(bottom_center, dimensions.width, dimensions.length, heading)
+    local top_corners = {}
+    for i, corner in ipairs(bottom_corners) do
+        top_corners[i] = vector3(corner.x, corner.y, corner.z + dimensions.height)
+    end
+    draw_rotated_box(bottom_corners, colour)
+    draw_rotated_box(top_corners, colour)
+    for i=1, #bottom_corners do
+        DrawLine(bottom_corners[i].x, bottom_corners[i].y, bottom_corners[i].z,
+                 top_corners[i].x, top_corners[i].y, top_corners[i].z,
+                 colour[1], colour[2], colour[3], colour[4])
+    end
+end
+
 -- Draws an interactive sprite on the screen
 -- Usage:
 --[[
@@ -325,17 +377,24 @@ end
     utils.draw.sphere({
         coords = vector3(0.5, 0.5, 0.0),
         radius = 1.0,
-        color = {255, 0, 0, 255},
+        colour = {255, 0, 0, 255},
         opacity = 1.0
     })
 ]]
 local function sphere(params)
     local coords = params.coords or vector3(0.5, 0.5, 0.0)
     local radius = params.radius or 1.0
-    local color = params.color or {255, 0, 0, 255}
-    local opacity = params.opacity or 1.0
-    DrawSphere(params.coords.x, params.coords.y, params.coords.z, params.radius, params.color[1], params.color[2], params.color[3], params.opacity)
+    local colour = params.colour or {255, 0, 0, 255}
+
+    -- Convert opacity from 0-255 range to 0.0-1.0 range
+    local opacity = (colour[4] / 255)
+
+    -- Ensure opacity is within the 0.0 to 1.0 range
+    opacity = math.min(math.max(opacity, 0.0), 1.0)
+
+    DrawSphere(coords.x, coords.y, coords.z, radius, colour[1], colour[2], colour[3], opacity)
 end
+
 
 -- Draws a spotlight, with or without shadow based on provided parameters
 -- Usage without shadow:
@@ -343,7 +402,7 @@ end
     utils.draw.spot_light({
         coords = vector3(0.5, 0.5, 0.0),
         direction = vector3(1.0, 0.0, 0.0),
-        color = {255, 0, 0},
+        colour = {255, 0, 0},
         distance = 100.0,
         brightness = 1.0,
         hardness = 0.0,
@@ -355,16 +414,16 @@ end
 local function spot_light(params)
     local coords = params.coords or vector3(0.5, 0.5, 0.0)
     local direction = params.direction or vector3(1.0, 0.0, 0.0)
-    local color = params.color or {255, 0, 0}
+    local colour = params.colour or {255, 0, 0}
     local distance = params.distance or 100.0
     local brightness = params.brightness or 1.0
     local hardness = params.hardness or 0.0
     local radius = params.radius or 13.0
     local falloff = params.falloff or 1.0
     if params.shadow_id then
-        DrawSpotLightWithShadow(params.coords.x, params.coords.y, params.coords.z, params.direction.x, params.direction.y, params.direction.z, params.color[1], params.color[2], params.color[3], params.distance, params.brightness, params.roundness, params.radius, params.falloff, params.shadow_id)
+        DrawSpotLightWithShadow(params.coords.x, params.coords.y, params.coords.z, params.direction.x, params.direction.y, params.direction.z, params.colour[1], params.colour[2], params.colour[3], params.distance, params.brightness, params.roundness, params.radius, params.falloff, params.shadow_id)
     else
-        DrawSpotLight(params.coords.x, params.coords.y, params.coords.z, params.direction.x, params.direction.y, params.direction.z, params.color[1], params.color[2], params.color[3], params.distance, params.brightness, params.hardness, params.radius, params.falloff)
+        DrawSpotLight(params.coords.x, params.coords.y, params.coords.z, params.direction.x, params.direction.y, params.direction.z, params.colour[1], params.colour[2], params.colour[3], params.distance, params.brightness, params.hardness, params.radius, params.falloff)
     end
 end
 
@@ -484,6 +543,8 @@ utils.draw.line_2d = line_2d
 utils.draw.marker = marker
 utils.draw.movie = movie
 utils.draw.box = box
+utils.draw.draw_rotated_box = draw_rotated_box
+utils.draw.draw_3d_cuboid = draw_3d_cuboid
 utils.draw.interactive_sprite = interactive_sprite
 utils.draw.light = light
 utils.draw.poly = poly
