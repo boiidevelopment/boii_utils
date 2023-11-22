@@ -25,7 +25,35 @@ local function give_weapon(ped, weapon_name, ammo, equip_now, is_hidden, accurac
 end
 
 -- Extended create_ped function
--- Usage: utils.peds.create_ped(ped_data)
+-- Usage:
+--[[
+    local ped_data = {
+        base_data = {
+            model = "a_m_m_business_01", -- Model of the ped
+            coords = vector3(-254.09, -971.48, 31.22), -- Coordinates where the ped will be spawned
+            scenario = "WORLD_HUMAN_AA_COFFEE", -- Scenario the ped will be using (optional)
+            networked = false -- Whether the ped is networked or not
+        },
+        animation_data = { -- Optional
+            dict = "amb@world_human_aa_coffee@base", -- Animation dictionary
+            anim = "base", -- Animation name
+            blend_in = 8.0, -- Blend in speed
+            blend_out = -8.0, -- Blend out speed
+            duration = -1, -- Duration of the animation
+            flag = 49, -- Animation flag
+            playback_rate = 1.0 -- Playback rate of the animation
+        },
+        weapon_data = { -- Optional
+            weapon_name = "WEAPON_PISTOL", -- Weapon to give to the ped
+            ammo = 100, -- Amount of ammo
+            equip_now = true, -- Equip the weapon immediately
+            is_hidden = false, -- Weapon is hidden or not
+            accuracy = 100.0, -- Accuracy of the ped with the weapon
+            invincible = true -- Ped is invincible or not
+        }
+    }
+    local your_ped = utils.peds.create_ped(ped_data)  
+]]
 local function create_ped(data)
     local base_data = data.base_data or {}
     utils.requests.model(GetHashKey(base_data.model))
