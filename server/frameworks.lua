@@ -108,6 +108,43 @@ local function has_item(_src, item_name, item_amount)
     return false
 end
 
+-- Function to get a players balances depending on framework
+local function get_balances(_src)
+    local player = get_player(_src)
+    if not player then return false end
+
+    if framework == 'boii_base' then
+        return player.balances
+    elseif framework == 'qb-core' then
+        -- TO DO:
+    elseif framework == 'esx_legacy' then
+        -- TO DO:
+    elseif framework == 'ox_core' then  
+        -- TO DO:
+    elseif framework == 'custom' then
+        
+    end
+end
+
+-- Function to adjust a players balance depending on framework
+local function adjust_balance(_src, options)
+    local player = get_player(_src)
+    if not player then return false end
+
+    if framework == 'boii_base' then
+        player.modify_balance(options.balance_type, options.action, options.amount, options.note)
+    elseif framework == 'qb-core' then
+        -- TO DO:
+    elseif framework == 'esx_legacy' then
+        -- TO DO:
+    elseif framework == 'ox_core' then  
+        -- TO DO:
+    elseif framework == 'custom' then
+        
+    end
+end
+
+
 --[[
     CREATE TABLES
 ]]
@@ -245,3 +282,5 @@ utils.fw.get_player = get_player
 utils.fw.get_id_params = get_id_params
 utils.fw.get_insert_params = get_insert_params
 utils.fw.has_item = has_item
+utils.fw.get_balances = get_balances
+utils.fw.adjust_balance = adjust_balance
