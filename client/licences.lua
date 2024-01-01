@@ -43,12 +43,12 @@ end
 
 -- Function to check if a player has passed a specific part of the licence test
 -- Usage: utils.licences.check_licence('driving', 'theory')
-local function check_licence(licence_id, test_type)
-    utils.callback.cb('boii_utils:sv:check_licence', {licence_id = licence_id, test_type = test_type}, function(response)
+local function check_licence(licence_id, test_type, cb)
+    utils.callback.cb('boii_utils:sv:check_licence_passed', {licence_id = licence_id, test_type = test_type}, function(response)
         if response.passed then
-            return true
+            cb(true)
         else
-            return false
+            cb(false)
         end
     end)
 end
@@ -62,30 +62,3 @@ utils.licences = utils.licences or {}
 utils.licences.get_licences = get_licences
 utils.licences.update_licence = update_licence
 utils.licences.check_licence = check_licence
-
---[[
-    TESTING
-]]
-
--- Test command to get all licences
-RegisterCommand('client_get_licences', function()
-    get_licences()
-end)
-
--- Test command to update licence status
-RegisterCommand('client_update_licence', function(source, args, rawCommand)
-    if #args < 3 then
-        print("Usage: /client_update_licence <licence_id> <theory/practical> <true/false>")
-        return
-    end
-    update_licence(args[1], args[2], args[3] == 'true')
-end)
-
--- Test command to check if the player passed a specific licence test
-RegisterCommand('client_check_licence_passed', function(source, args, rawCommand)
-    if #args < 2 then
-        print("Usage: /client_check_licence_passed <licence_id> <theory/practical>")
-        return
-    end
-    check_licence(args[1], args[2])
-end)
