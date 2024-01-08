@@ -26,10 +26,13 @@ end
 ]]
 
 local function get_data(key)
+    local player_data
     if framework == 'boii_base' then
         player_data = fw.get_data(key)
+        return player_data
     elseif framework == 'qb-core' then
-        -- TO DO:
+        player_data = fw.Functions.GetPlayerData()
+        return player_data
     elseif framework == 'esx_legacy' then
         -- TO DO:
     elseif framework == 'ox_core' then  
@@ -40,14 +43,15 @@ local function get_data(key)
 end
 
 local function get_player_name()
-    local p_data = get_data()
+    local player_data = get_data()
     local player_name
     
     if framework == 'boii_base' then
         player_name = player_data.identity.first_name .. ' ' .. player_data.identity.last_name
         return player_name
     elseif framework == 'qb-core' then
-        -- TO DO:
+        player_name = player_data.charinfo.firstname .. ' ' .. player_data.charinfo.lastname
+        return player_name
     elseif framework == 'esx_legacy' then
         -- TO DO:
     elseif framework == 'ox_core' then  
