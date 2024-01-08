@@ -7,8 +7,8 @@
 ]]
 
 -- Round a given number to the specified number of decimals
--- Usage: local rounded = round_number(5.6789, 2) -- Returns 5.68
-local function round_number(number, decimals)
+-- Usage: local rounded = round(5.6789, 2) -- Returns 5.68
+local function round(number, decimals)
     local power = 10 ^ decimals
     return math.floor(number * power + 0.5) / power
 end
@@ -114,7 +114,7 @@ end
 
 utils.maths = utils.maths or {}
 
-utils.maths.round_number = round_number
+utils.maths.round = round
 utils.maths.calculate_distance = calculate_distance
 utils.maths.clamp = clamp
 utils.maths.is_within_range = is_within_range
