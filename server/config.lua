@@ -83,14 +83,26 @@ config.licences = {
             ['theory'] = false, -- Default setting for licence theory completion
             ['practical'] = false, -- Default setting for licence practical completion
         },
-        ['aviation'] = { 
-            ['id'] = 'aviation', -- ID used to match licence
+        ['truck'] = { 
+            ['id'] = 'truck', -- ID used to match licence
+            ['label'] = 'Truck Driving Licence', -- Human readable label for the licence
+            ['theory'] = false, -- Default setting for licence theory completion
+            ['practical'] = false, -- Default setting for licence practical completion
+        },
+        ['plane'] = { 
+            ['id'] = 'plane', -- ID used to match licence
             ['label'] = 'Pilots Licence', -- Human readable label for the licence
             ['theory'] = false, -- Default setting for licence theory completion
             ['practical'] = false, -- Default setting for licence practical completion
         },
-        ['boating'] = { 
-            ['id'] = 'boating', -- ID used to match licence
+        ['helicopter'] = { 
+            ['id'] = 'helicopter', -- ID used to match licence
+            ['label'] = 'Helicopter Licence', -- Human readable label for the licence
+            ['theory'] = false, -- Default setting for licence theory completion
+            ['practical'] = false, -- Default setting for licence practical completion
+        },
+        ['boat'] = { 
+            ['id'] = 'boat', -- ID used to match licence
             ['label'] = 'Boating Licence', -- Human readable label for the licence
             ['theory'] = false, -- Default setting for licence theory completion
             ['practical'] = false, -- Default setting for licence practical completion
