@@ -9,7 +9,7 @@ author 'boiidevelopment'
 
 description 'BOII | Development - Utility Library'
 
-version '0.0.4'
+version '0.0.5'
 
 lua54 'yes'
 
@@ -25,12 +25,13 @@ shared_scripts {
     'shared/networking.lua',
     'shared/serialization.lua',
     'shared/test_commands.lua',
-    'shared/exports.lua',
+    'shared/exports.lua'
 }
 
 server_scripts {
     '@oxmysql/lib/MySQL.lua',
     'server/config.lua',
+    'server/notifications.lua',
     'server/date_time.lua',
     'server/networking.lua',
     'server/scopes.lua',
@@ -40,11 +41,13 @@ server_scripts {
     'server/groups.lua',
     'server/skills.lua',
     'server/reputation.lua',
-    'server/licences.lua'
+    'server/licences.lua',
+    'server/items.lua'
 }
 
 client_scripts {
     'client/config.lua',
+    'client/notifications.lua',
     'client/requests.lua',
     'client/player.lua',
     'client/entities.lua',
@@ -60,7 +63,7 @@ client_scripts {
     'client/skills.lua',
     'client/reputation.lua',
     'client/licences.lua',
-    'client/test_commands.lua',
+    'client/test_commands.lua'
 }
 
 escrow_ignore {
