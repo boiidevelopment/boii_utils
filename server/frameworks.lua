@@ -85,7 +85,7 @@ end
 
 -- Function to check if player has a specific item (and optionally its amount)
 local function has_item(_src, item_name, item_amount)
-    local player = utils.fw.get_player(_src)
+    local player = get_player(_src)
     if not player then return false end
 
     local required_amount = item_amount or 1
@@ -108,6 +108,27 @@ local function has_item(_src, item_name, item_amount)
     return false
 end
 
+local function adjust_inventory(_src, options)
+    local player = get_player(_src)
+    if not player then return false end
+
+    if framework == 'boii_base' then
+        player.modify_inventory(options.item_id, options.action, options.amount)
+    elseif framework == 'qb-core' then
+        if options.action == 'add' then
+            player.Functions.AddItem(options.item_id, options.amount, nil, options.info)
+        elseif options.action == 'remove' then
+            player.Functions.RemoveItem(options.item_id, options.amount, nil, options.info)
+        end
+    elseif framework == 'esx_legacy' then
+        -- TO DO:
+    elseif framework == 'ox_core' then  
+        -- TO DO:
+    elseif framework == 'custom' then
+        
+    end
+end
+
 -- Function to get a players balances depending on framework
 local function get_balances(_src)
     local player = get_player(_src)
@@ -116,7 +137,7 @@ local function get_balances(_src)
     if framework == 'boii_base' then
         return player.balances
     elseif framework == 'qb-core' then
-        -- TO DO:
+        return player.PlayerData.money
     elseif framework == 'esx_legacy' then
         -- TO DO:
     elseif framework == 'ox_core' then  
@@ -134,7 +155,11 @@ local function adjust_balance(_src, options)
     if framework == 'boii_base' then
         player.modify_balance(options.balance_type, options.action, options.amount, options.note)
     elseif framework == 'qb-core' then
-        -- TO DO:
+        if options.action == 'add' then
+            player.Functions.AddMoney(options.balance_type, options.amount, options.note)
+        elseif options.action == 'remove' then
+            player.Functions.RemoveMoney(options.balance_type, options.amount, options.note)
+        end
     elseif framework == 'esx_legacy' then
         -- TO DO:
     elseif framework == 'ox_core' then  
@@ -284,3 +309,4 @@ utils.fw.get_insert_params = get_insert_params
 utils.fw.has_item = has_item
 utils.fw.get_balances = get_balances
 utils.fw.adjust_balance = adjust_balance
+utils.fw.adjust_inventory = adjust_inventory
