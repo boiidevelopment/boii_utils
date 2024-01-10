@@ -9,7 +9,7 @@ author 'boiidevelopment'
 
 description 'BOII | Development - Utility Library'
 
-version '0.0.5'
+version '0.0.6'
 
 lua54 'yes'
 
@@ -32,6 +32,7 @@ server_scripts {
     '@oxmysql/lib/MySQL.lua',
     'server/config.lua',
     'server/notifications.lua',
+    'server/database.lua',
     'server/date_time.lua',
     'server/networking.lua',
     'server/scopes.lua',
