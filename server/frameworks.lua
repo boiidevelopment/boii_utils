@@ -1,3 +1,7 @@
+----------------------------------
+--<!>-- BOII | DEVELOPMENT --<!>--
+----------------------------------
+
 --[[
     FRAMEWORK 
 ]]
@@ -169,6 +173,39 @@ local function adjust_balance(_src, options)
     end
 end
 
+-- Function to get a players identity information depending on framework
+local function get_identity(_src)
+    local player = get_player(_src)
+    if not player then return false end
+
+    local player_data
+
+    if framework == 'boii_base' then
+        player_data = {
+            first_name = player.identity.first_name,
+            last_name = player.identity.last_name,
+            dob = player.identity.dob,
+            sex = player.identity.sex,
+            nationality = player.identity.nationality
+        }
+        return player_data
+    elseif framework == 'qb-core' then
+        player_data = {
+            first_name = player.charinfo.firstname,
+            last_name = player.charinfo.lastname,
+            dob = player.charinfo.birthdate,
+            sex = player.charinfo.gender,
+            nationality = player.charinfo.nationality
+        }
+        return player_data
+    elseif framework == 'esx_legacy' then
+        -- TO DO:
+    elseif framework == 'ox_core' then  
+        -- TO DO:
+    elseif framework == 'custom' then
+        -- Add your own custom framework code here
+    end
+end
 
 --[[
     CREATE TABLES
