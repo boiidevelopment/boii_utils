@@ -43,31 +43,8 @@ local function get_data(key)
     end
 end
 
--- Function to return a players name
-local function get_player_name()
-    local p_data = get_data()
-    if not p_data then return false end
-    local first_name, lastname
-    
-    if framework == 'boii_base' then
-        first_name = p_data.identity.first_name
-        last_name = p_data.identity.last_name
-        return first_name, last_name
-    elseif framework == 'qb-core' then
-        first_name = p_data.charinfo.firstname
-        last_name = p_data.charinfo.lastname
-        return first_name, last_name
-    elseif framework == 'esx_legacy' then
-        -- TO DO:
-    elseif framework == 'ox_core' then  
-        -- TO DO:
-    elseif framework == 'custom' then
-        -- add code for your own framework here
-    end
-end
-
 -- Function to get a players identity information depending on framework
-local function get_identity(_src)
+local function get_identity()
     local p_data = get_data()
     if not p_data then return false end
 
@@ -105,5 +82,6 @@ end
 ]]
 
 utils.fw = utils.fw or {}
+
 utils.fw.get_data = get_data
-utils.fw.get_player_name = get_player_name
+utils.fw.get_identity = get_identity
