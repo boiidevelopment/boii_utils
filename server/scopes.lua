@@ -30,6 +30,30 @@ local function trigger_scope_event(event_name, scope_owner, ...)
     TriggerClientEvent(event_name, scope_owner, ...)
 end
 
+-- Function to get all players within a certain range of a point or a player
+-- If 'include_source' is true, the source player will be included in the list
+-- Usage: local players_in_range = utils.scope.get_players_in_range(coords_or_source, range, include_source)
+local function get_players_in_range(coords_or_source, range, include_source)
+    local players_in_range = {}
+    local source_coords
+    if type(coords_or_source) == 'number' then
+        source_coords = GetEntityCoords(GetPlayerPed(coords_or_source))
+    else
+        source_coords = coords_or_source
+    end
+    local players = GetPlayers()
+    for _, player_id in ipairs(players) do
+        local ped_coords = GetEntityCoords(GetPlayerPed(player_id))
+        local distance = #(source_coords - ped_coords)
+        if distance <= range then
+            if player_id ~= coords_or_source or include_source then
+                players_in_range[#players_in_range + 1] = player_id
+            end
+        end
+    end
+    return players_in_range
+end
+
 --[[
     EVENTS
 ]]
@@ -75,3 +99,4 @@ utils.scope = utils.scope or {}
 
 utils.scope.get_player_scope = get_player_scope
 utils.scope.trigger_scope_event = trigger_scope_event
+utils.scope.get_players_in_range = get_players_in_range
