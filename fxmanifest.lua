@@ -9,7 +9,7 @@ author 'boiidevelopment'
 
 description 'BOII | Development - Utility Library'
 
-version '0.0.6'
+version '0.0.7'
 
 lua54 'yes'
 
@@ -24,6 +24,7 @@ shared_scripts {
     'shared/validation.lua',
     'shared/networking.lua',
     'shared/serialization.lua',
+    'shared/keys.lua',
     'shared/test_commands.lua',
     'shared/exports.lua'
 }
