@@ -9,7 +9,7 @@ author 'boiidevelopment'
 
 description 'BOII | Development - Utility Library'
 
-version '0.0.7'
+version '0.0.8'
 
 lua54 'yes'
 
@@ -40,6 +40,7 @@ server_scripts {
     'server/buckets.lua',
     'server/callbacks.lua',
     'server/frameworks.lua',
+    'server/conversions.lua',
     'server/groups.lua',
     'server/skills.lua',
     'server/reputation.lua',
@@ -62,6 +63,7 @@ client_scripts {
     'client/groups.lua',
     'client/callbacks.lua',
     'client/frameworks.lua',
+    'client/conversions.lua',
     'client/skills.lua',
     'client/reputation.lua',
     'client/licences.lua',
