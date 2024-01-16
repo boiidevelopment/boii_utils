@@ -10,7 +10,7 @@ local notifications = config.notifications
 
 local function send(options)
     if notifications == 'boii_ui' then
-        TriggerEvent('boii_ui:notify', options.type, options.header, options.message, options.duration)
+        TriggerEvent('boii_ui:notify', { type = options.type, header = options.header, message = options.message, duration = options.duration })
     elseif notifications == 'qb-core' then
         if options.type == 'information' then
             options.type = 'primary'
