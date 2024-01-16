@@ -21,6 +21,11 @@ local function send(options)
             options.type = 'info'
         end
         TriggerEvent("ESX:Notify", options.type, options.duration, options.message)
+    elseif notifications == 'ox_lib' then
+        if options.type == 'information' then
+            options.type = 'info'
+        end
+        TriggerEvent('ox_lib:notify', { type = options.type, title = options.header, description = options.message })
     end
 end
 
