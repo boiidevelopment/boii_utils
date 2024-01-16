@@ -21,6 +21,11 @@ local function send(_src, options)
             options.type = 'info'
         end
         TriggerClientEvent("ESX:Notify", _src, options.type, options.duration, options.message)
+    elseif notifications == 'ox_lib' then
+        if options.type == 'information' then
+            options.type = 'info'
+        end
+        TriggerClientEvent('ox_lib:notify', _src, { type = options.type, title = options.header, description = options.message })
     end
 end
 
