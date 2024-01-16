@@ -17,7 +17,7 @@ https://docs.boii.dev/fivem/free-resources/boii_utils
 
 ### Install
 
-1. Edit the `server/config.lua` currently this is only for sql and groups stuff more will be added.
+1. Edit the `server/config.lua` and `client/config.lua`
 -- NOTE: There is no current included locale so if you wish to change the language you will have to do some code hunting through all the files until this is updated.
 2. Drag and drop `boii_utils` into your server resource and ensure this before any scripts using the resource.
 3. Restart server or restart script live either or works.
