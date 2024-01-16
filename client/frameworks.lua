@@ -16,7 +16,11 @@ elseif framework == 'qb-core' then
 elseif framework == 'esx_legacy' then
     fw = exports['es_extended']:getSharedObject()
 elseif framework == 'ox_core' then    
-    -- TO DO: Add initialization for ox_core
+    local file = ('imports/%s.lua'):format(IsDuplicityVersion() and 'server' or 'client')
+    local import = LoadResourceFile('ox_core', file)
+    local chunk = assert(load(import, ('@@ox_core/%s'):format(file)))
+    chunk()
+    fw = Ox
 elseif framework == 'custom' then
     -- Custom framework initialization
 end
@@ -36,9 +40,9 @@ local function get_data(key)
         player_data = fw.Functions.GetPlayerData()
         return player_data
     elseif framework == 'esx_legacy' then
-        -- TO DO:
+        player_data = fw.GetPlayerData()
     elseif framework == 'ox_core' then  
-        -- TO DO:
+        player_data = fw.GetPlayerData()
     elseif framework == 'custom' then
         
     end
@@ -77,7 +81,13 @@ local function get_identity()
             nationality = 'LS, Los Santos'
         }
     elseif framework == 'ox_core' then  
-        -- TO DO:
+         player_data = {
+            first_name = player.firstName,
+            last_name = player.lastName,
+            dob = player.dob,
+            sex = player.gender,
+            nationality = 'LS, Los Santos'
+        }
     elseif framework == 'custom' then
         -- Add your own custom framework code here
     end
