@@ -16,7 +16,11 @@ elseif framework == 'qb-core' then
 elseif framework == 'esx_legacy' then
     fw = exports['es_extended']:getSharedObject()
 elseif framework == 'ox_core' then    
-    -- TO DO: Add initialization for ox_core
+    local file = ('imports/%s.lua'):format(IsDuplicityVersion() and 'server' or 'client')
+    local import = LoadResourceFile('ox_core', file)
+    local chunk = assert(load(import, ('@@ox_core/%s'):format(file)))
+    chunk()
+    fw = Ox
 elseif framework == 'custom' then
     -- Custom framework initialization
 end
@@ -36,7 +40,7 @@ local function get_player(_src)
     elseif framework == 'esx_legacy' then
         player = fw.GetPlayerFromId(_src)
     elseif framework == 'ox_core' then
-        -- TO DO: Add logic for ox_core
+        player = fw.GetPlayer(_src)
     elseif framework == 'custom' then
         -- Custom framework logic
     end
@@ -58,7 +62,8 @@ local function get_id_params(_src)
         query = 'identifier = ?'
         params = { player.identifier }
     elseif framework == 'ox_core' then
-        -- TO DO: Add logic for ox_core
+        query = 'charId = ? AND userId = ?'
+        params = { player.charId, player.userId }
     elseif framework == 'custom' then
         -- Custom framework logic
     end
@@ -83,7 +88,9 @@ local function get_insert_params(_src, data_type, data_name, data)
         values = '?, ?'
         params = { player.identifier, json.encode(data) }
     elseif framework == 'ox_core' then
-        -- TO DO: Add logic for ox_core
+        columns = {'charId', 'userId', data_type}
+        values = '?, ?, ?'
+        params = { player.charId, player.userId, json.encode(data) }
     elseif framework == 'custom' then
         -- Custom framework logic
     end
@@ -108,7 +115,8 @@ local function has_item(_src, item_name, item_amount)
         local item = player.getInventoryItem(item_name)
         return item ~= nil and item.count >= required_amount
     elseif framework == 'ox_core' then
-        -- TO DO: Add logic for ox_core
+        local count = exports.ox_inventory:Search(_src, 'count', item_name)
+        return count ~= nil and count >= required_amount
     elseif framework == 'custom' then
         -- Custom framework logic
     end
@@ -136,8 +144,12 @@ local function adjust_inventory(_src, options)
         elseif options.action == 'remove' then
             player.removeInventoryItem(options.item_id, options.amount)
         end
-    elseif framework == 'ox_core' then  
-        -- TO DO: Add logic for ox_core
+     elseif framework == 'ox_core' then  
+        if options.action == 'add' then
+            exports.ox_inventory:AddItem(_src, options.item_id, options.amount, options.info)
+        elseif options.action == 'remove' then
+            exports.ox_inventory:RemoveItem(_src, options.item_id, options.amount, options.info)
+        end
     elseif framework == 'custom' then
         -- Custom framework logic
     end
@@ -161,7 +173,7 @@ local function get_balances(_src)
             end
         end
     elseif framework == 'ox_core' then  
-        -- TO DO: Add logic for ox_core
+        balances = exports.ox_inventory:Search(_src, 'count', 'money')
     elseif framework == 'custom' then
         -- Custom framework logic
     end
@@ -182,7 +194,7 @@ local function get_balance_by_type(_src, balance_type)
     elseif framework == 'esx_legacy' then
         balance = balances[balance_type]
     elseif framework == 'ox_core' then  
-        -- TO DO: Add logic for ox_core
+        balance = balances
     elseif framework == 'custom' then
         -- Custom framework logic
     end
@@ -210,7 +222,11 @@ local function adjust_balance(_src, options)
             player.removeAccountMoney(options.balance_type, options.amount)
         end
     elseif framework == 'ox_core' then  
-        -- TO DO: Add logic for ox_core
+        if options.action == 'add' then
+            exports.ox_inventory:AddItem(_src, 'money', options.amount)
+        elseif options.action == 'remove' then
+            exports.ox_inventory:RemoveItem(_src, 'money', options.amount)
+        end
     elseif framework == 'custom' then
         -- Custom framework logic
     end
@@ -249,7 +265,13 @@ local function get_identity(_src)
             nationality = 'LS, Los Santos'
         }
     elseif framework == 'ox_core' then  
-        -- TO DO: Add logic for ox_core
+        player_data = {
+            first_name = player.firstName,
+            last_name = player.lastName,
+            dob = player.dob,
+            sex = player.gender,
+            nationality = 'LS, Los Santos'
+        }
     elseif framework == 'custom' then
         -- Custom framework logic
     end
@@ -293,7 +315,16 @@ local function create_skill_tables()
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
         ]], config.skills.sql.table_name)              
     elseif framework == 'ox_core' then
-        -- TO DO:
+        query = string.format([[
+            CREATE TABLE IF NOT EXISTS `%s` (
+                `charId` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+                `userId` INT UNSIGNED NOT NULL,
+                `skills` json DEFAULT '{}',
+                PRIMARY KEY (`charId`) USING BTREE,
+                KEY `FK_%s_users` (`userId`) USING BTREE,
+                CONSTRAINT `FK_%s_users` FOREIGN KEY (`userId`) REFERENCES `users` (`userId`) ON UPDATE CASCADE ON DELETE CASCADE
+            );
+        ]], config.skills.sql.table_name, config.skills.sql.table_name, config.skills.sql.table_name)
     elseif framework == 'custom' then
         -- Add the table schema required for your custom framework here
     end
@@ -335,7 +366,16 @@ local function create_rep_tables()
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
         ]], config.reputation.sql.table_name)              
     elseif framework == 'ox_core' then
-        -- TO DO:
+        query = string.format([[
+            CREATE TABLE IF NOT EXISTS `%s` (
+                `charId` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+                `userId` INT UNSIGNED NOT NULL,
+                `reputation` json DEFAULT '{}',
+                PRIMARY KEY (`charId`) USING BTREE,
+                KEY `FK_%s_users` (`userId`) USING BTREE,
+                CONSTRAINT `FK_%s_users` FOREIGN KEY (`userId`) REFERENCES `users` (`userId`) ON UPDATE CASCADE ON DELETE CASCADE
+            );
+        ]], config.reputation.sql.table_name, config.reputation.sql.table_name, config.reputation.sql.table_name)
     elseif framework == 'custom' then
         -- Add the table schema required for your custom framework here
     end
@@ -377,7 +417,16 @@ local function create_licence_tables()
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
         ]], config.licences.sql.table_name)              
     elseif framework == 'ox_core' then
-        -- TO DO:
+        query = string.format([[
+            CREATE TABLE IF NOT EXISTS `%s` (
+                `charId` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+                `userId` INT UNSIGNED NOT NULL,
+                `licences` json DEFAULT '{}',
+                PRIMARY KEY (`charId`) USING BTREE,
+                KEY `FK_%s_users` (`userId`) USING BTREE,
+                CONSTRAINT `FK_%s_users` FOREIGN KEY (`userId`) REFERENCES `users` (`userId`) ON UPDATE CASCADE ON DELETE CASCADE
+            );
+        ]], config.licences.sql.table_name, config.licences.sql.table_name, config.licences.sql.table_name)
     elseif framework == 'custom' then
         -- Add the table schema required for your custom framework here
     end
