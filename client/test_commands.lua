@@ -14,20 +14,20 @@ RegisterCommand('test_create_blip', function()
         show = true
     }
     utils.blips.create_blip(blip_data)
-    utils.debugging.info("Blip created!")
+    utils.debug.info("Blip created!")
 end)
 
 -- Test command to toggle all blips
 RegisterCommand('test_toggle_all_blips', function()
     utils.blips.toggle_all_blips(not utils.blips.are_blips_enabled())
-    utils.debugging.info("Toggled all blips!")
+    utils.debug.info("Toggled all blips!")
 end)
 
 -- Test command to toggle blips by category
 RegisterCommand('test_toggle_shop_blips', function()
     local current_state = utils.blips.get_category_state('shop')
     utils.blips.toggle_blips_by_category('shop', not current_state)
-    utils.debugging.info("Toggled shop blips!")
+    utils.debug.info("Toggled shop blips!")
 end)
 
 -- Test command to create multiple blips
@@ -37,20 +37,20 @@ RegisterCommand('test_create_multiple_blips', function()
         { coords = vector3(550.0, 150.0, 30.0), sprite = 41, colour = 2, scale = 1.5, label = 'Blip 2', category = 'store', show = true }
     }
     utils.blips.create_blips(blip_config)
-    utils.debugging.info("Multiple blips created!")
+    utils.debug.info("Multiple blips created!")
 end)
 
 -- Test command to remove all blips
 RegisterCommand('test_remove_all_blips', function()
     utils.blips.remove_all_blips()
-    utils.debugging.info("All blips removed!")
+    utils.debug.info("All blips removed!")
 end)
 
 -- Test command to get all created blips and print their labels
 RegisterCommand('test_get_all_blips', function()
     local all_blips = utils.blips.get_all_blips()
     for _, blip_data in ipairs(all_blips) do
-        utils.debugging.info(blip_data.label)
+        utils.debug.info(blip_data.label)
     end
 end)
 
@@ -59,7 +59,7 @@ RegisterCommand('test_get_shop_blips', function()
     local shop_blips = utils.blips.get_blips_by_category('shop')
     for _, blip in ipairs(shop_blips) do
         local label = utils.blips.get_blip_label(blip)
-        utils.debugging.info(label)
+        utils.debug.info(label)
     end
 end)
 
@@ -68,9 +68,9 @@ RegisterCommand('test_update_blip_label', function()
     local all_blips = utils.blips.get_all_blips()
     if #all_blips > 0 then
         utils.blips.update_blip_label(all_blips[1].blip, 'Updated Label')
-        utils.debugging.info("Updated label of the first blip!")
+        utils.debug.info("Updated label of the first blip!")
     else
-        utils.debugging.err("No blips found!")
+        utils.debug.err("No blips found!")
     end
 end)
 
@@ -79,9 +79,9 @@ RegisterCommand('test_update_sprite', function()
     local all_blips = utils.blips.get_all_blips()
     if #all_blips > 0 then
         utils.blips.update_blip_sprite(all_blips[1].blip, 162)
-        utils.debugging.info("Updated sprite of the first blip!")
+        utils.debug.info("Updated sprite of the first blip!")
     else
-        utils.debugging.err("No blips found!")
+        utils.debug.err("No blips found!")
     end
 end)
 
@@ -90,9 +90,9 @@ RegisterCommand('test_update_colour', function()
     local all_blips = utils.blips.get_all_blips()
     if #all_blips > 0 then
         utils.blips.update_blip_colour(all_blips[1].blip, 2)
-        utils.debugging.info("Updated color of the first blip!")
+        utils.debug.info("Updated color of the first blip!")
     else
-        utils.debugging.err("No blips found!")
+        utils.debug.err("No blips found!")
     end
 end)
 
@@ -101,29 +101,29 @@ RegisterCommand('test_update_scale', function()
     local all_blips = utils.blips.get_all_blips()
     if #all_blips > 0 then
         utils.blips.update_blip_scale(all_blips[1].blip, 2.0)
-        utils.debugging.info("Updated scale of the first blip!")
+        utils.debug.info("Updated scale of the first blip!")
     else
-        utils.debugging.err("No blips found!")
+        utils.debug.err("No blips found!")
     end
 end)
 
 -- Test command to check if blips are currently enabled
 RegisterCommand('test_are_blips_enabled', function()
     local status = utils.blips.are_blips_enabled()
-    utils.debugging.info("Blips are " .. (status and "enabled" or "disabled"))
+    utils.debug.info("Blips are " .. (status and "enabled" or "disabled"))
 end)
 
 -- Test command to get the category state for 'shop'
 RegisterCommand('test_get_shop_category_state', function()
     local state = utils.blips.get_category_state('shop')
-    utils.debugging.info("Shop category blips are " .. (state and "visible" or "hidden"))
+    utils.debug.info("Shop category blips are " .. (state and "visible" or "hidden"))
 end)
 
 -- Test command to get all created blips and print their labels
 RegisterCommand('test_get_all_blips_labels', function()
     local all_blips = utils.blips.get_all_blips()
     for _, blip_data in ipairs(all_blips) do
-        utils.debugging.info(blip_data.label)
+        utils.debug.info(blip_data.label)
     end
 end)
 
@@ -154,25 +154,25 @@ end)
 -- Registering the test command to toggle displaying of coordinates
 RegisterCommand('test_toggle_coords', function()
     utils.developer.toggle_coords()
-    utils.debugging.info("Toggled display of coordinates!")
+    utils.debug.info("Toggled display of coordinates!")
 end, false)
 
 -- Registering the test command to toggle displaying of vehicle info
 RegisterCommand('test_toggle_vehicle_info', function()
     utils.developer.toggle_vehicle_info()
-    utils.debugging.info("Toggled display of vehicle info!")
+    utils.debug.info("Toggled display of vehicle info!")
 end, false)
 
 -- Registering the test command to toggle displaying of player info
 RegisterCommand('test_toggle_player_info', function()
     utils.developer.toggle_player_info()
-    utils.debugging.info("Toggled display of player info!")
+    utils.debug.info("Toggled display of player info!")
 end, false)
 
 -- Registering the test command to toggle displaying of environment info
 RegisterCommand('test_toggle_environment_info', function()
     utils.developer.toggle_environment_info()
-    utils.debugging.info("Toggled display of environment info!")
+    utils.debug.info("Toggled display of environment info!")
 end, false)
 
 
