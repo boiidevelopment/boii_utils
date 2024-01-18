@@ -8,8 +8,8 @@
 
 -- Internal function to handle debug logging for the licences section
 local function debug_log(type, message)
-    if config.debug.licences and utils.debugging[type] then
-        utils.debugging[type](message)
+    if config.debug.licences and utils.debug[type] then
+        utils.debug[type](message)
     end
 end
 
