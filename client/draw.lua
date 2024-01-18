@@ -75,7 +75,7 @@ local function line(params)
     local end_pos = params.end_pos
     local colour = params.colour or {255, 255, 255, 255}
     if not start_pos or not end_pos then
-        return utils.debugging.warn("Invalid vector3 coordinates provided to utils.draw.line function.")
+        return utils.debug.warn("Invalid vector3 coordinates provided to utils.draw.line function.")
     end
     DrawLine(start_pos.x, start_pos.y, start_pos.z, end_pos.x, end_pos.y, end_pos.z, table.unpack(colour))
 end
@@ -96,7 +96,7 @@ local function line_2d(params)
     local width = params.width
     local colour = params.colour or {255, 255, 255, 255}
     if not start_pos or not start_pos.x or not start_pos.y or not end_pos or not end_pos.x or not end_pos.y then
-        return utils.debugging.warn("Invalid 2D coordinates provided to utils.draw.line_2d function.")
+        return utils.debug.warn("Invalid 2D coordinates provided to utils.draw.line_2d function.")
     end
     DrawLine_2d(start_pos.x, start_pos.y, end_pos.x, end_pos.y, width, table.unpack(colour))
 end
@@ -170,7 +170,7 @@ local function box(params)
     local end_coords = params.end_coords
     local colour = params.colour or {255, 255, 255, 255}
     if not start_coords or not end_coords then
-        return utils.debugging.warn("Invalid vector3 coordinates provided to utils.draw.box function.")
+        return utils.debug.warn("Invalid vector3 coordinates provided to utils.draw.box function.")
     end
     DrawBox(start_coords.x, start_coords.y, start_coords.z, end_coords.x, end_coords.y, end_coords.z, table.unpack(colour))
 end
@@ -188,10 +188,10 @@ end
 ]]
 local function draw_rotated_box(corners, colour)
     if not (type(corners) == 'table' and #corners > 0) then
-        return utils.debugging.warn("Invalid corners table provided to utils.draw.draw_rotated_box function.")
+        return utils.debug.warn("Invalid corners table provided to utils.draw.draw_rotated_box function.")
     end
     if not (type(colour) == 'table' and #colour == 4) then
-        return utils.debugging.warn("Invalid colour table provided to utils.draw.draw_rotated_box function.")
+        return utils.debug.warn("Invalid colour table provided to utils.draw.draw_rotated_box function.")
     end
     for i=1, #corners do
         local next_index = i % #corners + 1
@@ -210,7 +210,7 @@ end
 ]]
 local function draw_3d_cuboid(center, dimensions, heading, colour)
     if not center or not dimensions or not colour then
-        return utils.debugging.warn("Invalid parameters provided to utils.draw.draw_3d_cuboid function.")
+        return utils.debug.warn("Invalid parameters provided to utils.draw.draw_3d_cuboid function.")
     end
     local bottom_center = vector3(center.x, center.y, center.z - dimensions.height / 2)
     local bottom_corners = utils.geometry.rotate_box(bottom_center, dimensions.width, dimensions.length, heading)
@@ -247,7 +247,7 @@ local function interactive_sprite(params)
     local rotation = params.rotation or 0.0
     local colour = params.colour or {255, 255, 255, 255}
     if not texture_dict or not texture_name then
-        return utils.debugging.warn("Invalid texture dictionary or name provided to utils.draw.interactive_sprite function.")
+        return utils.debug.warn("Invalid texture dictionary or name provided to utils.draw.interactive_sprite function.")
     end
     utils.requests.texture(texture_dict, true)
     DrawInteractiveSprite(texture_dict, texture_name, coords.x, coords.y, size.width, size.height, rotation, table.unpack(colour))
