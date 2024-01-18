@@ -8,8 +8,8 @@
 
 -- Internal function to handle debug logging for the reputation section
 local function debug_log(type, message)
-    if config.debug.reputation and utils.debugging[type] then
-        utils.debugging[type](message)
+    if config.debug.reputation and utils.debug[type] then
+        utils.debug[type](message)
     end
 end
 
