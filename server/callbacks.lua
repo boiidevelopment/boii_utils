@@ -39,7 +39,7 @@ AddEventHandler('boii_utils:sv:trigger_callback', function(name, data, client_cb
             TriggerClientEvent('boii_utils:cl:client_callback', _src, client_cb_id, server_cb_id, ...)
         end)
     else
-        utils.debugging.err('Callback not found:', name)
+        utils.debug.err('Callback not found:', name)
     end
 end)
 
