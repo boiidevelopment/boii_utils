@@ -8,22 +8,29 @@
 
 framework = config.framework
 
--- Framework initialization
-if framework == 'boii_base' then
-    fw = exports['boii_base']:get_object()
-elseif framework == 'qb-core' then
-    fw = exports['qb-core']:GetCoreObject()
-elseif framework == 'esx_legacy' then
-    fw = exports['es_extended']:getSharedObject()
-elseif framework == 'ox_core' then    
-    local file = ('imports/%s.lua'):format(IsDuplicityVersion() and 'server' or 'client')
-    local import = LoadResourceFile('ox_core', file)
-    local chunk = assert(load(import, ('@@ox_core/%s'):format(file)))
-    chunk()
-    fw = Ox
-elseif framework == 'custom' then
-    -- Custom framework initialization
-end
+CreateThread(function()
+    while GetResourceState(framework) ~= 'started' do
+        Wait(500)
+    end
+
+    if framework == 'boii_rp' then
+        fw = exports['boii_rp']:get_object()
+    elseif framework == 'qb-core' then
+        fw = exports['qb-core']:GetCoreObject()
+    elseif framework == 'esx_legacy' then
+        fw = exports['es_extended']:getSharedObject()
+    elseif framework == 'ox_core' then
+        local file = ('imports/%s.lua'):format(IsDuplicityVersion() and 'server' or 'client')
+        local import = LoadResourceFile('ox_core', file)
+        local chunk = assert(load(import, ('@@ox_core/%s'):format(file)))
+        chunk()
+        fw = Ox
+    elseif framework == 'custom' then
+        -- Custom framework initialization
+    end
+
+    return
+end)
 
 --[[
     FUNCTIONS
