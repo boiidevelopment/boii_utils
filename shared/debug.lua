@@ -18,12 +18,6 @@ local function log(message)
     print_message('6', 'LOG', message)
 end
 
--- Debug logging function
--- Usage: debug('This is a debug log message.')
-local function debug(message)
-    print_message('5', 'DEBUG', message)
-end
-
 -- Information logging function
 -- Usage: info('This is an information log message.')
 local function info(message)
@@ -81,14 +75,13 @@ end
     ASSIGN LOCALS
 ]]
 
-utils.debugging = utils.debugging or {}
+utils.debug = utils.debug or {}
 
-utils.debugging.log = log
-utils.debugging.debug = debug
-utils.debugging.info = info
-utils.debugging.warn = warn
-utils.debugging.err = err
-utils.debugging.custom = custom
-utils.debugging.conditional = conditional
-utils.debugging.resource_status_log = resource_status_log
-utils.debugging.log_execution_time = log_execution_time
+utils.debug.log = log
+utils.debug.info = info
+utils.debug.warn = warn
+utils.debug.err = err
+utils.debug.custom = custom
+utils.debug.conditional = conditional
+utils.debug.resource_status_log = resource_status_log
+utils.debug.log_execution_time = log_execution_time
