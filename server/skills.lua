@@ -7,10 +7,10 @@
 ]]
 
 -- Function to handle debug logging for the skills section
--- Note: This is internally used by the provided functions and doesn't need direct usage, unless you wish to make modifications and require debugging.
+-- Note: This is internally used by the provided functions and doesn't need direct usage, unless you wish to make modifications and require debug.
 local function debug_log(type, message)
-    if config.debug.skills and utils.debugging[type] then
-        utils.debugging[type](message)
+    if config.debug.skills and utils.debug[type] then
+        utils.debug[type](message)
     end
 end
 
