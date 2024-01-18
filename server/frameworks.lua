@@ -8,22 +8,29 @@
 
 framework = config.framework
 
--- Framework initialization
-if framework == 'boii_base' then
-    fw = exports['boii_base']:get_object()
-elseif framework == 'qb-core' then
-    fw = exports['qb-core']:GetCoreObject()
-elseif framework == 'esx_legacy' then
-    fw = exports['es_extended']:getSharedObject()
-elseif framework == 'ox_core' then    
-    local file = ('imports/%s.lua'):format(IsDuplicityVersion() and 'server' or 'client')
-    local import = LoadResourceFile('ox_core', file)
-    local chunk = assert(load(import, ('@@ox_core/%s'):format(file)))
-    chunk()
-    fw = Ox
-elseif framework == 'custom' then
-    -- Custom framework initialization
-end
+CreateThread(function()
+    while GetResourceState(framework) ~= 'started' do
+        Wait(500)
+    end
+
+    if framework == 'boii_rp' then
+        fw = exports['boii_rp']:get_object()
+    elseif framework == 'qb-core' then
+        fw = exports['qb-core']:GetCoreObject()
+    elseif framework == 'esx_legacy' then
+        fw = exports['es_extended']:getSharedObject()
+    elseif framework == 'ox_core' then
+        local file = ('imports/%s.lua'):format(IsDuplicityVersion() and 'server' or 'client')
+        local import = LoadResourceFile('ox_core', file)
+        local chunk = assert(load(import, ('@@ox_core/%s'):format(file)))
+        chunk()
+        fw = Ox
+    elseif framework == 'custom' then
+        -- Custom framework initialization
+    end
+
+    return
+end)
 
 --[[
     FUNCTIONS
@@ -285,7 +292,7 @@ end
 -- Function to create sql table on load if not created already
 -- This runs internally meaning it is not a exportable function it simply creates tables required for the utils sections
 local function create_skill_tables()
-    utils.debugging.info("Creating skills table if not exists...")
+    utils.debug.info("Creating skills table if not exists...")
     local query
     if framework == 'boii_base' then
         query = string.format([[
@@ -329,14 +336,14 @@ local function create_skill_tables()
         -- Add the table schema required for your custom framework here
     end
     MySQL.update(query, {})
-    utils.debugging.info("Skills tables created if not exists...")
+    utils.debug.info("Skills tables created if not exists...")
 end
 create_skill_tables()
 
 -- Function to create sql table on load if not created already
 -- This runs internally meaning it is not a exportable function it simply creates tables required for the utils sections
 local function create_rep_tables()
-    utils.debugging.info("Creating reputations table if not exists...")
+    utils.debug.info("Creating reputations table if not exists...")
     local query
     if framework == 'boii_base' then
         query = string.format([[
@@ -380,14 +387,14 @@ local function create_rep_tables()
         -- Add the table schema required for your custom framework here
     end
     MySQL.update(query, {})
-    utils.debugging.info("Reputations tables created if not exists...")
+    utils.debug.info("Reputations tables created if not exists...")
 end
 create_rep_tables()
 
 -- Function to create sql table on load if not created already
 -- This runs internally meaning it is not a exportable function it simply creates tables required for the utils sections
 local function create_licence_tables()
-    utils.debugging.info("Creating licence table if not exists...")
+    utils.debug.info("Creating licence table if not exists...")
     local query
     if framework == 'boii_base' then
         query = string.format([[
@@ -431,7 +438,7 @@ local function create_licence_tables()
         -- Add the table schema required for your custom framework here
     end
     MySQL.update(query, {})
-    utils.debugging.info("Licence tables created if not exists...")
+    utils.debug.info("Licence tables created if not exists...")
 end
 create_licence_tables()
 
