@@ -28,7 +28,7 @@ end
         max_members = 5  -- Optional. If not provided, config value is used
     })
     if not group_id then
-        utils.debugging.err("Group creation failed. Duplicated name.")
+        utils.debug.err("Group creation failed. Duplicated name.")
     end
 ]]
 local function create(params)
@@ -50,7 +50,7 @@ end
         name = 'racing-1',
         player_id = 2
     })
-    utils.debugging.info(tostring(grouped))  --> true or false
+    utils.debug.info(tostring(grouped))  --> true or false
 ]]
 local function in_group(params)
     for _, id in ipairs(player_groups[params.name].members) do
@@ -125,12 +125,12 @@ end
 ]]
 local function add(params)
     if #player_groups[params.name].members >= player_groups[params.name].max_members then
-        utils.debugging.info("Group has reached its max members limit.")
+        utils.debug.info("Group has reached its max members limit.")
         return false
     end
     local groups_for_player = get_player_groups(params.player_id)
     if #groups_for_player >= config.groups.max_groups then
-        utils.debugging.info("Player has reached the max number of groups they can be in.")
+        utils.debug.info("Player has reached the max number of groups they can be in.")
         return false
     end
     player_groups[params.name].members[#player_groups[params.name].members + 1] = params.player_id
