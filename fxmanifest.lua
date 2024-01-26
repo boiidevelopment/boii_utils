@@ -9,7 +9,7 @@ author 'boiidevelopment'
 
 description 'BOII | Development - Utility Library'
 
-version '1.0.0'
+version '1.1.0'
 
 lua54 'yes'
 
@@ -25,6 +25,7 @@ shared_scripts {
     'shared/networking.lua',
     'shared/serialization.lua',
     'shared/keys.lua',
+    'shared/data/default_ped_styles.lua',
     'shared/test_commands.lua',
     'shared/exports.lua',
 }
@@ -71,11 +72,12 @@ client_scripts {
     'client/reputation.lua',
     'client/licences.lua',
     'client/commands.lua',
+    'client/character_creation.lua',
     'client/test_commands.lua',
 }
 
 escrow_ignore {
-    'shared/*',
+    'shared/**/*',
     'client/*',
     'server/*'
 }
