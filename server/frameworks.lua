@@ -67,6 +67,27 @@ local function get_player(_src)
     return player
 end
 
+--- Retrieves player id from the server based on the framework.
+-- @param _src Player source identifier.
+-- @return Player's main identifier.
+-- @usage local player = utils.fw.get_player_id(player_source)
+local function get_player_id(_src)
+    local player = get_player(_src)
+    local player_id
+    if FRAMEWORK == 'boii_base' then
+        player_id = player.unique_id..'_'..player.char_id -- place holder until boii_base has a state id 
+    elseif FRAMEWORK == 'qb-core' then
+        player_id = player.PlayerData.citizenid
+    elseif FRAMEWORK == 'esx_legacy' then
+        player_id = player.identifier
+    elseif FRAMEWORK == 'ox_core' then
+        player_id = player.stateId
+    elseif FRAMEWORK == 'custom' then
+        -- Custom framework logic
+    end
+    return player_id
+end
+
 --- Prepares query parameters for database operations based on the framework.
 -- Useful for consistent database operations across different frameworks.
 -- @param _src Player source identifier.
@@ -324,8 +345,65 @@ local function get_identity(_src)
     return player_data
 end
 
---- @section Database tables
+--- Retrieves a player's identity information from the database depending on the framework.
+-- This function abstracts the differences between various server frameworks by providing a unified interface
+-- to access player identity information. It supports multiple frameworks and custom implementations.
+-- @param id The player's identifier specific to the framework (e.g., passport for boii_base, citizenid for qb-core).
+-- @return table|nil A table containing identity information (first name, last name, date of birth, sex, and nationality)
+-- if the player is found, or nil if the player is not found or the framework is not supported.
+-- @usage local identity = get_identity_by_id('some_player_id')
+local function get_identity_by_id(id)
+    local player_data
+    local queries = {
+        ['boii_base'] = {
+            query = "SELECT identity FROM players WHERE passport = ?",
+            fields = { 'first_name', 'last_name', 'dob', 'sex', 'nationality' }
+        },
+        ['qb-core'] = {
+            query = "SELECT charinfo FROM players WHERE citizenid = ?",
+            fields = { 'firstname', 'lastname', 'birthdate', 'gender', 'nationality' }
+        },
+        ['esx_legacy'] = {
+            query = "SELECT firstName, lastName, dateofbirth, sex FROM users WHERE identifier = ?",
+            fields = { 'firstName', 'lastName', 'dateofbirth', 'sex' }
+        },
+        ['ox_core'] = {
+            query = "SELECT firstName, lastName, dob, gender FROM users WHERE stateId = ?",
+            fields = { 'firstName', 'lastName', 'dob', 'gender' }
+        },
+        ['custom'] = {
+            query = "", -- Custom framework SQL query
+            fields = {} -- Custom framework fields
+        }
+    }
+    local framework_query = queries[FRAMEWORK]
+    if not framework_query then
+        print("Framework not supported.")
+        return nil
+    end
+    local db_result = MySQL.query.await(framework_query.query, {id})
+    if db_result and #db_result > 0 then
+        local result = db_result[1]
+        if FRAMEWORK == 'qb-core' and result.charinfo then
+            result = json.decode(result.charinfo)
+        elseif FRAMEWORK == 'boii_base' and result.identity then
+            result = json.decode(result.identity)
+        end
+        player_data = {}
+        for _, field in ipairs(framework_query.fields) do
+            player_data[field] = result[field]
+        end
+        if FRAMEWORK == 'esx_legacy' or FRAMEWORK == 'ox_core' then
+            player_data.nationality = 'LS, Los Santos'
+        end
+    else
+        print("Player not found.")
+        return nil
+    end
+    return player_data
+end
 
+--- @section Database tables
 
 --- Function to create sql table on load if not created already
 -- This runs internally meaning it is not a exportable function it simply creates tables required for the utils sections
