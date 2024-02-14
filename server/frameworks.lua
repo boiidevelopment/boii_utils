@@ -560,6 +560,7 @@ create_licence_tables()
 utils.fw = utils.fw or {}
 
 utils.fw.get_player = get_player
+utils.fw.get_player_id = get_player_id
 utils.fw.get_id_params = get_id_params
 utils.fw.get_insert_params = get_insert_params
 utils.fw.has_item = has_item
@@ -568,3 +569,4 @@ utils.fw.get_balance_by_type = get_balance_by_type
 utils.fw.adjust_balance = adjust_balance
 utils.fw.adjust_inventory = adjust_inventory
 utils.fw.get_identity = get_identity
+utils.fw.get_identity_by_id = get_identity_by_id
