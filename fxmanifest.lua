@@ -9,7 +9,7 @@ author 'boiidevelopment'
 
 description 'BOII | Development - Utility Library'
 
-version '1.1.0'
+version '1.2.0'
 
 lua54 'yes'
 
@@ -33,6 +33,7 @@ shared_scripts {
 server_scripts {
     '@oxmysql/lib/MySQL.lua',
     'server/config.lua',
+    'server/version.lua',
     'server/notifications.lua',
     'server/database.lua',
     'server/connections.lua',
