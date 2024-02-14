@@ -311,6 +311,56 @@ local function rotate_box(center, width, length, heading)
     return rotated_corners
 end
 
+--- Calculates a rotation matrix from heading, pitch, and roll.
+-- @function calculate_rotation_matrix
+-- @param heading number: The heading/yaw angle in degrees.
+-- @param pitch number: The pitch angle in degrees.
+-- @param roll number: The roll angle in degrees.
+-- @return table: A rotation matrix represented as a 2D array.
+local function calculate_rotation_matrix(heading, pitch, roll)
+    local rad_heading = math.rad(heading or 0)
+    local rad_pitch = math.rad(pitch or 0)
+    local rad_roll = math.rad(roll or 0)
+    local z_rot_matrix = { 
+        {math.cos(rad_heading), -math.sin(rad_heading), 0}, 
+        {math.sin(rad_heading), math.cos(rad_heading),  0}, 
+        {0, 0, 1} 
+    }
+    return z_rot_matrix
+end
+
+--- Translates a point to a box's local coordinate system using a rotation matrix.
+-- @function translate_point_to_local_space
+-- @param point table: The point to be translated (x, y, z).
+-- @param box_origin table: The origin point of the box (x, y, z).
+-- @param rot_matrix table: The rotation matrix to apply.
+-- @return table: The point translated to the box's local space.
+local function translate_point_to_local_space(point, box_origin, rot_matrix)
+    local relative_point = {
+        x = point.x - box_origin.x,
+        y = point.y - box_origin.y,
+        z = point.z - box_origin.z
+    }
+    return {
+        x = rot_matrix[1][1] * relative_point.x + rot_matrix[1][2] * relative_point.y + rot_matrix[1][3] * relative_point.z,
+        y = rot_matrix[2][1] * relative_point.x + rot_matrix[2][2] * relative_point.y + rot_matrix[2][3] * relative_point.z,
+        z = rot_matrix[3][1] * relative_point.x + rot_matrix[3][2] * relative_point.y + rot_matrix[3][3] * relative_point.z
+    }
+end
+
+--- Determines if a point is inside an oriented 3D box.
+-- @function is_point_in_oriented_box
+-- @param point table: The point to check (x, y, z).
+-- @param box table: The box with properties: coords (x, y, z), width, height, depth, heading, pitch, and roll.
+-- @return boolean: True if the point is inside the box, false otherwise.
+local function is_point_in_oriented_box(point, box)
+    local rot_matrix = calculate_rotation_matrix(box.heading, box.pitch, box.roll)
+    local translated_point = translate_point_to_local_space(point, box.coords, rot_matrix)
+    return math.abs(translated_point.x) <= box.width / 2 and
+           math.abs(translated_point.y) <= box.height / 2 and
+           math.abs(translated_point.z) <= box.depth / 2
+end
+
 --- @section Assign local functions
 
 utils.geometry = utils.geometry or {}
@@ -338,3 +388,6 @@ utils.geometry.rotate_point_around_point_2d = rotate_point_around_point_2d
 utils.geometry.distance_point_to_plane = distance_point_to_plane
 utils.geometry.rotation_to_direction = rotation_to_direction
 utils.geometry.rotate_box = rotate_box
+utils.geometry.calculate_rotation_matrix = calculate_rotation_matrix
+utils.geometry.translate_point_to_local_space = translate_point_to_local_space
+utils.geometry.is_point_in_oriented_box = is_point_in_oriented_box
