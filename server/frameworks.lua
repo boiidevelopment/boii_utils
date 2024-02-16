@@ -345,62 +345,19 @@ local function get_identity(_src)
     return player_data
 end
 
---- Retrieves a player's identity information from the database depending on the framework.
--- This function abstracts the differences between various server frameworks by providing a unified interface
--- to access player identity information. It supports multiple frameworks and custom implementations.
--- @param id The player's identifier specific to the framework (e.g., passport for boii_base, citizenid for qb-core).
--- @return table|nil A table containing identity information (first name, last name, date of birth, sex, and nationality)
--- if the player is found, or nil if the player is not found or the framework is not supported.
--- @usage local identity = get_identity_by_id('some_player_id')
-local function get_identity_by_id(id)
-    local player_data
-    local queries = {
-        ['boii_base'] = {
-            query = "SELECT identity FROM players WHERE passport = ?",
-            fields = { 'first_name', 'last_name', 'dob', 'sex', 'nationality' }
-        },
-        ['qb-core'] = {
-            query = "SELECT charinfo FROM players WHERE citizenid = ?",
-            fields = { 'firstname', 'lastname', 'birthdate', 'gender', 'nationality' }
-        },
-        ['esx_legacy'] = {
-            query = "SELECT firstName, lastName, dateofbirth, sex FROM users WHERE identifier = ?",
-            fields = { 'firstName', 'lastName', 'dateofbirth', 'sex' }
-        },
-        ['ox_core'] = {
-            query = "SELECT firstName, lastName, dob, gender FROM users WHERE stateId = ?",
-            fields = { 'firstName', 'lastName', 'dob', 'gender' }
-        },
-        ['custom'] = {
-            query = "", -- Custom framework SQL query
-            fields = {} -- Custom framework fields
-        }
-    }
-    local framework_query = queries[FRAMEWORK]
-    if not framework_query then
-        print("Framework not supported.")
-        return nil
+--- Retrieves a players identity information by their id *(citizenid, unique_id+char_id, etc..)
+-- @param user_id: The id of the user to retrieve identity information for.
+-- @return A table of identity information.
+-- @usage local identity = utils.fw.get_identity_by_id('boii_12345_1')
+local function get_identity_by_id(user_id)
+    local players = GetPlayers()
+    for _, player in ipairs(players) do
+        local p_id = get_player_id(player)
+        if p_id == user_id then
+            return get_identity(player)
+        end
     end
-    local db_result = MySQL.query.await(framework_query.query, {id})
-    if db_result and #db_result > 0 then
-        local result = db_result[1]
-        if FRAMEWORK == 'qb-core' and result.charinfo then
-            result = json.decode(result.charinfo)
-        elseif FRAMEWORK == 'boii_base' and result.identity then
-            result = json.decode(result.identity)
-        end
-        player_data = {}
-        for _, field in ipairs(framework_query.fields) do
-            player_data[field] = result[field]
-        end
-        if FRAMEWORK == 'esx_legacy' or FRAMEWORK == 'ox_core' then
-            player_data.nationality = 'LS, Los Santos'
-        end
-    else
-        print("Player not found.")
-        return nil
-    end
-    return player_data
+    return nil
 end
 
 --- @section Database tables
