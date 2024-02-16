@@ -14,7 +14,7 @@ local NOTIFICATIONS = config.notifications
 -- @param options table: Table of notification data to be used by notification systems 
 local function send(_src, options)
     if NOTIFICATIONS == 'boii_ui' then
-        if options.type == 'info' or option.type == 'primary' then
+        if options.type == 'info' or options.type == 'primary' then
             options.type = 'information'
         end
         TriggerClientEvent('boii_ui:notify', _src, { type = options.type, header = options.header, message = options.message, duration = options.duration })
@@ -24,12 +24,12 @@ local function send(_src, options)
         end
         TriggerClientEvent('QBCore:Notify', _src, options.message, options.type, options.duration)
     elseif NOTIFICATIONS == 'esx_legacy' then
-        if options.type == 'information' or option.type == 'primary' then
+        if options.type == 'information' or options.type == 'primary' then
             options.type = 'info'
         end
         TriggerClientEvent("ESX:Notify", _src, options.type, options.duration, options.message)
     elseif NOTIFICATIONS == 'ox_lib' then
-        if options.type == 'information' or option.type == 'primary' then
+        if options.type == 'information' or options.type == 'primary' then
             options.type = 'info'
         end
         TriggerClientEvent('ox_lib:notify', _src, { type = options.type, title = options.header, description = options.message })
