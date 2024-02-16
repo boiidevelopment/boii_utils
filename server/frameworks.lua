@@ -47,6 +47,25 @@ end)
 
 --- @section Local functions
 
+--- Retrieves all players based on framework
+-- @return players table
+local function get_players()
+
+    local players = {}
+    if FRAMEWORK == 'boii_base' then
+        players = fw.get_users()
+    elseif FRAMEWORK == 'qb-core' then
+        players = fw.Functions.GetPlayers()
+    elseif FRAMEWORK == 'esx_legacy' then
+        players = fw.GetPlayers()
+    elseif FRAMEWORK == 'ox_core' then
+        players = fw.GetPlayers()
+    elseif FRAMEWORK == 'custom' then
+        -- Custom framework logic
+    end
+    return players
+end
+
 --- Retrieves player data from the server based on the framework.
 -- @param _src Player source identifier.
 -- @return Player data object.
@@ -350,11 +369,12 @@ end
 -- @return A table of identity information.
 -- @usage local identity = utils.fw.get_identity_by_id('boii_12345_1')
 local function get_identity_by_id(user_id)
-    local players = GetPlayers()
+    local players = get_players()
     for _, player in ipairs(players) do
         local p_id = get_player_id(player)
         if p_id == user_id then
-            return get_identity(player)
+            local identity = get_identity(player)
+            return identity
         end
     end
     return nil
@@ -511,11 +531,11 @@ local function create_licence_tables()
 end
 create_licence_tables()
 
-
 --- @section Assign local functions
 
 utils.fw = utils.fw or {}
 
+utils.fw.get_players = get_players
 utils.fw.get_player = get_player
 utils.fw.get_player_id = get_player_id
 utils.fw.get_id_params = get_id_params
