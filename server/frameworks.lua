@@ -515,7 +515,7 @@ end
 -- @param check_on_duty Optional boolean to also check if the player is on-duty for the job.
 -- @return Boolean indicating if the player has any of the specified jobs and meets the on-duty condition.
 local function player_has_job(_src, job_names, check_on_duty)
-    local player = Ox.GetPlayer(_src)
+    local player = get_player(_src)
     local player_jobs = get_player_jobs(_src)
     local job_found = false
     local on_duty_status = false
