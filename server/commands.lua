@@ -28,8 +28,8 @@ end
 -- @param unique_id string: The unique ID of the user.
 -- @param required_rank string/table: The required rank or ranks.
 -- @return boolean: True if the user has the required permission, false otherwise.
-local function has_permission(unique_id, required_rank)
-    local user_data = get_user_data(unique_id)
+local function has_permission(_src, unique_id, required_rank)
+    local user_data = get_user_data(_src)
     if not user_data then 
         print('user data not found')
         return false 
@@ -72,7 +72,7 @@ local function register_command(command, required_rank, help, params, handler)
         local user = utils.connections.get_user(source)
         if user then
             local unique_id = user.unique_id
-            if not required_rank or required_rank == nil or has_permission(unique_id, required_rank) then
+            if not required_rank or required_rank == nil or has_permission(source, unique_id, required_rank) then
                 handler(source, args, raw)
             else
                 TriggerClientEvent('chat:addMessage', source, {args = {'^1SYSTEM', 'You do not have permission to execute this command.'}})
