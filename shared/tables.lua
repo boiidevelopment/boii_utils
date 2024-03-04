@@ -22,15 +22,20 @@ local function print_table(t, indent)
 end
 
 --- Checks if a table contains a specific value.
+-- Updated to support nested tables.
 -- @function table_contains
 -- @param t The table to check.
 -- @param val The value to search for in the table.
 -- @return Boolean indicating if the value was found.
 -- @usage local contains = utils.tables.table_contains({1, 2, 3, 4, 5}, 3)
-local function table_contains(t, val)
-    for _, value in ipairs(t) do
+local function table_contains(tbl, val)
+    for _, value in pairs(tbl) do
         if value == val then
             return true
+        elseif type(value) == "table" then
+            if table_contains(value, val) then
+                return true
+            end
         end
     end
     return false
