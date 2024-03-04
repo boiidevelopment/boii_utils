@@ -55,16 +55,6 @@ local CLOTHING_ITEMS = {
     {index = 7, style = 'bracelets_style', texture = 'bracelets_texture', is_prop = true}
 }
 
---- Camera positions to be used throughout creation process
--- @table CAMERA_POSITIONS
--- @see change_camera_position
-local CAMERA_POSITIONS = {
-    face_cam = { offset = { x = 0, y = 1.05, z = 0 }, height_adjustment = 0.5 },
-    body_cam = { offset = { x = 0, y = 1.75, z = 0 }, height_adjustment = 0 },
-    leg_cam = { offset = { x = 0, y = 1.05, z = 0 }, height_adjustment = -0.5 },
-    feet_cam = { offset = { x = 0, y = 1.05, z = 0 }, height_adjustment = -0.75 } 
-}
-
 --- @section Variables
 
 --- Current sex of the player. Used to determine specific appearance settings.
@@ -235,8 +225,8 @@ local function set_ped_appearance(player, data)
     debug_log('info', 'Function: set_ped_appearance | Note: Success!')
 end
 
---- Updates utils.shared.style with new values to be displayed on player.
--- This function is key for synchronizing player's ped appearance changes with the backend data.
+--- Updates utils.shared.style with new values to be displayed on the player.
+-- This function is key for synchronizing a player's ped appearance changes with the backend data.
 -- @function update_ped_data
 -- @param sex string: The sex to select from creation style.
 -- @param data_type string: The type of data being updated (e.g., 'genetics', 'barber').
@@ -253,13 +243,25 @@ end
 ]]
 -- @see set_ped_appearance
 local function update_ped_data(sex, category, id, value)
+    -- Log the function call with parameters
+    debug_log('info', 'Function: update_ped_data called with parameters:')
+    debug_log('info', 'Sex: ' .. sex)
+    debug_log('info', 'Category: ' .. category)
+    debug_log('info', 'ID: ' .. id)
+    debug_log('info', 'Value: ' .. tostring(value))
+
     if not sex or not category or not id or not value then 
         debug_log('err', 'Function: update_ped_data failed | Reason: Missing one or more required parameters. - sex, category, id, or value.') 
         return 
     end
+
     if id == 'resemblance' or id == 'skin' then
         value = value / 100
     end
+
+    -- Log the action being taken
+    debug_log('info', 'Updating utils.shared.style...')
+
     if type(utils.shared.style[sex][category][id]) == 'table' then
         for k, _ in pairs(utils.shared.style[sex][category][id]) do
             utils.shared.style[sex][category][id][k] = value[k]
@@ -267,10 +269,16 @@ local function update_ped_data(sex, category, id, value)
     else
         utils.shared.style[sex][category][id] = value
     end
+
+    -- Log the updated style data
+    debug_log('info', 'Updated style data:')
+    debug_log('info', 'utils.shared.style[' .. sex .. '][' .. category .. '][' .. id .. '] = ' .. tostring(value))
+
     current_sex = sex
     local player_ped = PlayerPedId()
     set_ped_appearance(player_ped, utils.shared.style[sex])
 end
+
 
 --- Function to change the player's ped model based on the selected sex.
 -- Changes the player's ped model to correspond with the selected sex during character creation.
@@ -341,35 +349,6 @@ local function rotate_ped(direction)
     end
     new_heading = new_heading % 360
     SetEntityHeading(player_ped, new_heading)
-end
-
---- Function to change camera position based on the given configuration.
--- Changes the camera to focus on the face, body, legs, or feet of the player's ped.
--- @function change_camera_position
--- @param cam_position table: The configuration for the camera position.
--- @usage 
---[[
-    change_camera_position(cam_position)
-]]
--- @example
---[[
-    change_camera_position(CAMERA_POSITIONS['face_cam'])
-    change_camera_position(CAMERA_POSITIONS['body_cam'])
-]]
-local function change_camera_position(cam_position)
-    if not cam_position then
-        debug_log('err', 'Function: change_camera_position failed. | Reason: Camera position parameter is missing.')
-        return
-    end
-    local player_ped = PlayerPedId()
-    local coords = GetOffsetFromEntityInWorldCoords(player_ped, cam_position.offset.x, cam_position.offset.y, cam_position.offset.z)
-    RenderScriptCams(false, false, 0, 1, 0)
-    DestroyCam(cam, false)
-    cam = CreateCam('DEFAULT_SCRIPTED_CAMERA', true)
-    SetCamActive(cam, true)
-    RenderScriptCams(true, false, 0, true, true)
-    SetCamCoord(cam, coords.x, coords.y, coords.z + cam_position.height_adjustment)
-    SetCamRot(cam, 0.0, 0.0, GetEntityHeading(player_ped) + 180)
 end
 
 --- Function to load and apply a character model.
