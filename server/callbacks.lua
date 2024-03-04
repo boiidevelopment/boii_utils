@@ -29,6 +29,29 @@ local function generate_callback_id()
     return callback_id
 end
 
+--- @section Callbacks
+
+--- Validates a player's distance from the target location to ensure they are within a specific range.
+-- @param _src number: The player's server ID.
+-- @param data table: Data containing location information.
+-- @param cb function: Callback function to return the validation result.
+-- @usage validate_distance(_src, { location = vector3(0, 0, 0), distance = 5.0 }, function() ... end)
+local function validate_distance(_src, data, cb)
+    local location = data.location
+    local max_distance = data.distance or 10.0
+    local position = {x = location.x, y = location.y, z = location.z}
+    local coords = GetEntityCoords(GetPlayerPed(_src))
+    local player_position = {x = coords.x, y = coords.y, z = coords.z}
+    local distance = utils.maths.calculate_distance(player_position, position)
+    if distance <= max_distance then
+        cb(true)
+    else
+        cb(false)
+    end
+end
+register_callback('boii_utils:sv:validate_distance', validate_distance)
+
+
 --- @section Events
 
 --- Event handler for server-side callbacks.
@@ -56,3 +79,4 @@ end)
 utils.callback = utils.callback or {}
 
 utils.callback.register = register_callback
+utils.callback.validate_distance = validate_distance
