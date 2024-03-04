@@ -52,8 +52,8 @@ end)
 local function get_players()
 
     local players = {}
-    if FRAMEWORK == 'boii_base' then
-        players = fw.get_users()
+    if FRAMEWORK == 'boii_rp' then
+        players = fw.get_players()
     elseif FRAMEWORK == 'qb-core' then
         players = fw.Functions.GetPlayers()
     elseif FRAMEWORK == 'esx_legacy' then
@@ -72,8 +72,8 @@ end
 -- @usage local player = utils.fw.get_player(player_source)
 local function get_player(_src)
     local player
-    if FRAMEWORK == 'boii_base' then
-        player = fw.get_user(_src)
+    if FRAMEWORK == 'boii_rp' then
+        player = fw.get_player(_src)
     elseif FRAMEWORK == 'qb-core' then
         player = fw.Functions.GetPlayer(_src)
     elseif FRAMEWORK == 'esx_legacy' then
@@ -92,11 +92,13 @@ end
 -- @usage local player = utils.fw.get_player_id(player_source)
 local function get_player_id(_src)
     local player = get_player(_src)
+    if not player then print('No player found for source: '.._src) return false end
+
     local player_id
-    if FRAMEWORK == 'boii_base' then
-        player_id = player.unique_id..'_'..player.char_id -- place holder until boii_base has a state id 
+    if FRAMEWORK == 'boii_rp' then
+        player_id = player.unique_id..'_'..player.char_id -- place holder until boii_rp has a state id 
     elseif FRAMEWORK == 'qb-core' then
-        player_id = player.PlayerData.citizenid
+        player_id = player.PlayerData.citizenid -- line 80
     elseif FRAMEWORK == 'esx_legacy' then
         player_id = player.identifier
     elseif FRAMEWORK == 'ox_core' then
@@ -115,7 +117,7 @@ end
 local function get_id_params(_src)
     local player = get_player(_src)
     local query, params
-    if FRAMEWORK == 'boii_base' then
+    if FRAMEWORK == 'boii_rp' then
         query = 'unique_id = ? AND char_id = ?'
         params = { player.unique_id, player.char_id }
     elseif FRAMEWORK == 'qb-core' then
@@ -144,7 +146,7 @@ end
 local function get_insert_params(_src, data_type, data_name, data)
     local player = get_player(_src)
     local columns, values, params
-    if FRAMEWORK == 'boii_base' then
+    if FRAMEWORK == 'boii_rp' then
         columns = {'unique_id', 'char_id', data_type}
         values = '?, ?, ?'
         params = { player.unique_id, player.char_id, json.encode(data) }
@@ -178,7 +180,7 @@ local function has_item(_src, item_name, item_amount)
 
     local required_amount = item_amount or 1
 
-    if FRAMEWORK == 'boii_base' then
+    if FRAMEWORK == 'boii_rp' then
         local item = player.get_inventory_item(item_name)
         return item ~= nil and item.quantity >= required_amount
     elseif FRAMEWORK == 'qb-core' then
@@ -197,37 +199,103 @@ local function has_item(_src, item_name, item_amount)
     return false
 end
 
+--- Retrieves an item from the player's inventory.
+-- @param _src Player source identifier.
+-- @param item_name Name of the item to retrieve.
+-- @return Item object if found, nil otherwise.
+-- @usage local item = utils.fw.get_item(_src, 'item_name')
+local function get_item(_src, item_name)
+    local player = get_player(_src)
+    if not player then return nil end -- Player not found, return nil
+
+    local item
+    if FRAMEWORK == 'boii_rp' then
+        item = player.get_inventory_item(item_name)
+    elseif FRAMEWORK == 'qb-core' then
+        item = player.Functions.GetItemByName(item_name)
+    elseif FRAMEWORK == 'esx_legacy' then
+        item = player.getInventoryItem(item_name)
+    elseif FRAMEWORK == 'ox_core' then
+        local items = exports.ox_inventory:Search(_src, 'items', item_name)
+        if items and #items > 0 then
+            item = items[1] -- Assuming the first match is what we want
+        end
+    elseif FRAMEWORK == 'custom' then
+        -- Custom framework logic to retrieve item
+    end
+
+    return item -- Returns nil if not found or the item object if found
+end
+
 --- Adjusts a player's inventory based on given options.
 -- Options include adding or removing items and setting item information.
 -- @param _src Player source identifier.
 -- @param options Options for inventory adjustment.
--- @usage utils.fw.adjust_inventory(player_source, { item_id = 'item_id', action = 'add', amount = 1, info = {} })
+-- @usage
+--[[
+local items = {
+    {item_id = 'burger', action = 'add', quantity = 3},
+    {item_id = 'water', action = 'remove', quantity = 1},
+}    
+local validation_data = { location = vector3(100.0, 100.0, 20.0), distance = 10.0, drop_player = true }
+utils.fw.adjust_inventory({
+    items = items, 
+    validation_data = validation_data, 
+    note = 'Used a pawnshop.', 
+    should_save = true
+})
+]]
 local function adjust_inventory(_src, options)
     local player = get_player(_src)
     if not player then return false end
-
-    if FRAMEWORK == 'boii_base' then
-        player.modify_inventory(options.item_id, options.action, options.amount, options.info)
-    elseif FRAMEWORK == 'qb-core' then
-        if options.action == 'add' then
-            player.Functions.AddItem(options.item_id, options.amount, nil, options.info)
-        elseif options.action == 'remove' then
-            player.Functions.RemoveItem(options.item_id, options.amount)
+    local function proceed()
+        if FRAMEWORK == 'boii_rp' then
+            player:modify_inventory(options.items, options.note, options.should_save)
+        else
+            for _, item in ipairs(options.items) do
+                if item.action == 'add' then
+                    if FRAMEWORK == 'qb-core' then
+                        player.Functions.AddItem(item.item_id, item.quantity, nil, item.data)
+                    elseif FRAMEWORK == 'esx_legacy' then
+                        player.addInventoryItem(item.item_id, item.quantity)
+                    elseif FRAMEWORK == 'ox_core' then
+                        exports.ox_inventory:AddItem(_src, item.item_id, item.quantity, item.data)
+                    elseif FRAMEWORK == 'custom' then
+                        -- Custom logic here
+                    end
+                elseif item.action == 'remove' then
+                    if FRAMEWORK == 'qb-core' then
+                        player.Functions.RemoveItem(item.item_id, item.quantity)
+                    elseif FRAMEWORK == 'esx_legacy' then
+                        player.removeInventoryItem(item.item_id, item.quantity)
+                    elseif FRAMEWORK == 'ox_core' then
+                        exports.ox_inventory:RemoveItem(_src, item.item_id, item.quantity, item.data)
+                    elseif FRAMEWORK == 'custom' then
+                        -- Custom logic here
+                    end
+                end
+            end
         end
-    elseif FRAMEWORK == 'esx_legacy' then
-        if options.action == 'add' then
-            player.addInventoryItem(options.item_id, options.amount)
-        elseif options.action == 'remove' then
-            player.removeInventoryItem(options.item_id, options.amount)
-        end
-    elseif FRAMEWORK == 'ox_core' then  
-        if options.action == 'add' then
-            exports.ox_inventory:AddItem(_src, options.item_id, options.amount, options.info)
-        elseif options.action == 'remove' then
-            exports.ox_inventory:RemoveItem(_src, options.item_id, options.amount, options.info)
-        end
-    elseif FRAMEWORK == 'custom' then
-        -- Custom framework logic
+    end
+    if options.validation_data then
+        utils.callback.validate_distance(_src, {location = options.validation_data.location, distance = options.validation_data.distance}, function(is_valid)
+            if is_valid then
+                proceed()
+            else
+                if options.validation_data.drop_player then
+                    DropPlayer(_src, 'Suspected range exploits.')
+                else
+                    utils.notify.send(_src, {
+                        header = 'Action Denied',
+                        message = 'You are too far from the required location to perform this action.',
+                        type = 'error',
+                        duration = 3500
+                    })
+                end
+            end
+        end)
+    else
+        proceed()
     end
 end
 
@@ -240,7 +308,7 @@ local function get_balances(_src)
     if not player then return false end
 
     local balances = {}
-    if FRAMEWORK == 'boii_base' then
+    if FRAMEWORK == 'boii_rp' then
         balances = player.balances
     elseif FRAMEWORK == 'qb-core' then
         balances = player.PlayerData.money
@@ -268,7 +336,7 @@ local function get_balance_by_type(_src, balance_type)
     if not balances then return false end
 
     local balance
-    if FRAMEWORK == 'boii_base' then
+    if FRAMEWORK == 'boii_rp' then
         balance = balances[balance_type].amount
     elseif FRAMEWORK == 'qb-core' then
         balance = balances[balance_type]
@@ -282,37 +350,76 @@ local function get_balance_by_type(_src, balance_type)
     return balance
 end
 
---- Function to adjust a player's balance based on the framework.
--- Supports adding or removing funds from different balance types.
+--- Function to adjust a player's balance based on the framework and optional distance validation.
+-- Supports adding or removing funds from different balance types with a single call.
+-- Optionally validates the player's distance from a given location before proceeding.
 -- @param _src Player source identifier.
--- @param options Options for balance adjustment.
--- @usage utils.fw.adjust_balance({ balance_type = 'balance_type', action = 'add/remove', amount = 1, note = 'a identifier note' })
+-- @param options Table containing balance operations, validation data, reason for the adjustment, and whether to save the update.
+-- @usage
+--[[
+local operations = {
+    {balance_type = 'bank', action = 'remove', amount = 1000},
+    {balance_type = 'savings', action = 'add', amount = 1000}
+}
+local validation_data = { location = vector3(100.0, 100.0, 20.0), distance = 10.0, drop_player = true }
+utils.fw.adjust_balance(_src, {
+    operations = operations, 
+    validation_data = validation_data, 
+    reason = 'Transfer from bank to savings', 
+    should_save = true
+})
+]]
 local function adjust_balance(_src, options)
     local player = get_player(_src)
     if not player then return false end
-
-    if FRAMEWORK == 'boii_base' then
-        player.modify_balance(options.balance_type, options.action, options.amount, options.note)
-    elseif FRAMEWORK == 'qb-core' then
-        if options.action == 'add' then
-            player.Functions.AddMoney(options.balance_type, options.amount, options.note)
-        elseif options.action == 'remove' then
-            player.Functions.RemoveMoney(options.balance_type, options.amount, options.note)
+    local function proceed()
+        if FRAMEWORK == 'boii_rp' then
+            player:modify_balances(options.operations, options.reason, options.should_save)
+        else
+            for _, op in ipairs(options.operations) do
+                if op.action == 'add' then
+                    if FRAMEWORK == 'qb-core' then
+                        player.Functions.AddMoney(op.balance_type, op.amount, options.reason)
+                    elseif FRAMEWORK == 'esx_legacy' then
+                        player.addAccountMoney(op.balance_type, op.amount)
+                    elseif FRAMEWORK == 'ox_core' then
+                        exports.ox_inventory:AddItem(_src, 'money', op.amount)
+                    elseif FRAMEWORK == 'custom' then
+                        -- Custom logic goes here
+                    end
+                elseif op.action == 'remove' then
+                    if FRAMEWORK == 'qb-core' then
+                        player.Functions.RemoveMoney(op.balance_type, op.amount, options.reason)
+                    elseif FRAMEWORK == 'esx_legacy' then
+                        player.removeAccountMoney(op.balance_type, op.amount)
+                    elseif FRAMEWORK == 'ox_core' then
+                        exports.ox_inventory:RemoveItem(_src, 'money', op.amount)
+                    elseif FRAMEWORK == 'custom' then
+                        -- Custom logic goes here
+                    end
+                end
+            end
         end
-    elseif FRAMEWORK == 'esx_legacy' then
-        if options.action == 'add' then
-            player.addAccountMoney(options.balance_type, options.amount)
-        elseif options.action == 'remove' then
-            player.removeAccountMoney(options.balance_type, options.amount)
-        end
-    elseif FRAMEWORK == 'ox_core' then  
-        if options.action == 'add' then
-            exports.ox_inventory:AddItem(_src, 'money', options.amount)
-        elseif options.action == 'remove' then
-            exports.ox_inventory:RemoveItem(_src, 'money', options.amount)
-        end
-    elseif FRAMEWORK == 'custom' then
-        -- Custom framework logic
+    end
+    if options.validation_data then
+        utils.callback.validate_distance(_src, options.validation_data, function(is_valid)
+            if is_valid then
+                proceed()
+            else
+                if options.validation_data.drop_player then
+                    DropPlayer(_src, 'Suspected range exploits.')
+                else
+                    utils.notify.send(_src, {
+                        header = 'Action Denied',
+                        message = 'You are too far from the required location to perform this action.',
+                        type = 'error',
+                        duration = 8500
+                    })
+                end
+            end
+        end)
+    else
+        proceed()
     end
 end
 
@@ -326,13 +433,13 @@ local function get_identity(_src)
 
     local player_data
 
-    if FRAMEWORK == 'boii_base' then
+    if FRAMEWORK == 'boii_rp' then
         player_data = {
-            first_name = player.identity.first_name,
-            last_name = player.identity.last_name,
-            dob = player.identity.dob,
-            sex = player.identity.sex,
-            nationality = player.identity.nationality
+            first_name = player.data.identity.first_name,
+            last_name = player.data.identity.last_name,
+            dob = player.data.identity.dob,
+            sex = player.data.identity.sex,
+            nationality = player.data.identity.nationality
         }
     elseif FRAMEWORK == 'qb-core' then
         player_data = {
@@ -364,7 +471,7 @@ local function get_identity(_src)
     return player_data
 end
 
---- Retrieves a players identity information by their id *(citizenid, unique_id+char_id, etc..)
+--- Retrieves a player's identity information by their id (citizenid, unique_id+char_id, etc..)
 -- @param user_id: The id of the user to retrieve identity information for.
 -- @return A table of identity information.
 -- @usage local identity = utils.fw.get_identity_by_id('boii_12345_1')
@@ -380,6 +487,180 @@ local function get_identity_by_id(user_id)
     return nil
 end
 
+--- Retrieves the job(s) of a player by their source identifier.
+-- @param _src The player's source identifier.
+-- @return A table containing the player's jobs and their on-duty status.
+local function get_player_jobs(_src)
+    local player_jobs = {}
+    local player = get_player(_src)
+    if player then
+        if FRAMEWORK == 'boii_rp' then
+            player_jobs = player.data.jobs
+        elseif FRAMEWORK == 'qb-core' then
+            player_jobs = player.PlayerData.job
+        elseif FRAMEWORK == 'esx_legacy' then
+            player_jobs = player.getJob()
+        elseif FRAMEWORK == 'ox_core' then
+            player_jobs = player.getGroups()
+        elseif FRAMEWORK == 'custom' then
+            -- Custom framework logic here
+        end
+    end
+    return player_jobs
+end
+
+--- Checks if a player has one of the specified jobs and optionally checks their on-duty status.
+-- @param _src The player's source identifier.
+-- @param job_names An array of job names to check against the player's jobs.
+-- @param check_on_duty Optional boolean to also check if the player is on-duty for the job.
+-- @return Boolean indicating if the player has any of the specified jobs and meets the on-duty condition.
+local function player_has_job(_src, job_names, check_on_duty)
+    local player = Ox.GetPlayer(_src)
+    local player_jobs = get_player_jobs(_src)
+    local job_found = false
+    local on_duty_status = false
+    if FRAMEWORK == 'boii_rp' then
+        if player_jobs.primary and utils.tables.table_contains(job_names, player_jobs.primary.id) then
+            job_found = true
+            on_duty_status = player_jobs.primary.on_duty
+            if check_on_duty and not on_duty_status then
+                return false
+            end
+        end
+        for _, secondary_job in ipairs(player_jobs.secondary or {}) do
+            if utils.tables.table_contains(job_names, secondary_job.id) then
+                job_found = true
+                on_duty_status = secondary_job.on_duty
+                if check_on_duty and not on_duty_status then
+                    return false
+                end
+            end
+        end
+    elseif FRAMEWORK == 'qb-core' then
+        if utils.tables.table_contains(job_names, player_jobs.name) then
+            job_found = true
+            on_duty_status = player_jobs.onduty
+        end
+    elseif FRAMEWORK == 'esx_legacy' then
+        if utils.tables.table_contains(job_names, player_jobs.id) then
+            job_found = true
+            on_duty_status = player_jobs.onDuty
+        end
+    elseif FRAMEWORK == 'ox_core' then
+        if utils.tables.table_contains(job_names, player_jobs) and player.hasGroup(job_names) then
+            job_found = true
+            on_duty_status = player.get('inService')
+        end
+    elseif FRAMEWORK == 'custom' then
+        -- Custom framework logic here
+    end
+    return job_found and (not check_on_duty or on_duty_status)
+end
+
+--- Retrieves a player's job grade for a specified job.
+-- @param _src The player's source identifier.
+-- @param job_id The job ID to retrieve the grade for.
+-- @return The grade of the player for the specified job, or nil if not found.
+local function get_player_job_grade(_src, job_id)
+    local player_jobs = get_player_jobs(_src)
+    if not player_jobs then
+        print('No job data found for player: ' .. _src)
+        return nil
+    end
+    if FRAMEWORK == 'boii_rp' then
+        if player_jobs.primary and player_jobs.primary.id == job_id then
+            return player_jobs.primary.grade
+        end
+        for _, job in ipairs(player_jobs.secondary or {}) do
+            if job.id == job_id then
+                return job.grade
+            end
+        end
+    elseif FRAMEWORK == 'qb-core' then
+        if player_jobs.name == job_id then
+            return player_jobs.grade.level
+        end
+    elseif FRAMEWORK == 'esx_legacy' then
+        if player_jobs.id == job_id then
+            return player_jobs.grade
+        end
+    elseif FRAMEWORK == 'ox_core' then
+        -- @todo add ox logic
+    elseif FRAMEWORK == 'custom' then
+        -- Custom framework logic goes here.
+    end
+
+    print('Job grade not found for player: ' .. _src .. ', Job ID: ' .. job_id)
+    return nil
+end
+
+--- Counts players with a specific job and optionally filters by on-duty status.
+-- @param job_names Table of job names to check against the players' jobs.
+-- @param check_on_duty Optional boolean to also check if the player is on-duty for the job.
+-- @return Two numbers: total players with the job, and total players with the job who are on-duty.
+local function count_players_by_job(job_names, check_on_duty)
+    local players = get_players()
+    local total_with_job = 0
+    local total_on_duty = 0
+    for _, player_src in ipairs(players) do
+        if player_has_job(player_src, job_names, false) then
+            total_with_job = total_with_job + 1
+            if player_has_job(player_src, job_names, true) then
+                total_on_duty = total_on_duty + 1
+            end
+        end
+    end
+    return total_with_job, total_on_duty
+end
+
+--- @section Callbacks
+
+--- Callback for checking if player has item by quantity.
+utils.callback.register('boii_utils:sv:has_item', function(_src, data, cb)
+    local item_name = data.item_name
+    local item_amount = data.item_amount or 1
+    local player_has_item = false
+    if has_item(_src, item_name, item_amount) then
+        player_has_item = true
+    else
+        player_has_item = false
+    end
+    cb(player_has_item)
+end)
+
+--- Callback for checking if player has the required job
+utils.callback.register('boii_utils:sv:player_has_job', function(_src, data, cb)
+    local jobs = data.jobs
+    local on_duty = data.on_duty
+    local player_has_job = false
+    if player_has_job(_src, jobs, on_duty) then
+        player_has_job = true
+    else
+        player_has_job = false
+    end
+    cb(player_has_job)
+end)
+
+--- Callback for checking if player has the required job
+utils.callback.register('boii_utils:sv:player_has_job', function(_src, data, cb)
+    local jobs = data.jobs
+    local on_duty = data.on_duty
+    local player_has_job = false
+    if player_has_job(_src, jobs, on_duty) then
+        player_has_job = true
+    else
+        player_has_job = false
+    end
+    cb(player_has_job)
+end)
+
+--- Callback for checking if player has the required job grade
+utils.callback.register('boii_utils:sv:get_player_job_grade', function(_src, data, cb)
+    local job = data.job
+    local job_grade = get_player_job_grade(_src, job)
+    cb(job_grade)
+end)
+
 --- @section Database tables
 
 --- Function to create sql table on load if not created already
@@ -387,7 +668,7 @@ end
 local function create_skill_tables()
     utils.debug.info("Creating skills table if not exists...")
     local query
-    if FRAMEWORK == 'boii_base' then
+    if FRAMEWORK == 'boii_rp' then
         query = string.format([[
             CREATE TABLE IF NOT EXISTS `%s` (
                 `unique_id` varchar(255) NOT NULL,
@@ -436,7 +717,7 @@ create_skill_tables()
 local function create_rep_tables()
     utils.debug.info("Creating reputations table if not exists...")
     local query
-    if FRAMEWORK == 'boii_base' then
+    if FRAMEWORK == 'boii_rp' then
         query = string.format([[
             CREATE TABLE IF NOT EXISTS `%s` (
                 `unique_id` varchar(255) NOT NULL,
@@ -486,7 +767,7 @@ create_rep_tables()
 local function create_licence_tables()
     utils.debug.info("Creating licence table if not exists...")
     local query
-    if FRAMEWORK == 'boii_base' then
+    if FRAMEWORK == 'boii_rp' then
         query = string.format([[
             CREATE TABLE IF NOT EXISTS `%s` (
                 `unique_id` varchar(255) NOT NULL,
@@ -531,6 +812,7 @@ local function create_licence_tables()
 end
 create_licence_tables()
 
+
 --- @section Assign local functions
 
 utils.fw = utils.fw or {}
@@ -540,6 +822,7 @@ utils.fw.get_player = get_player
 utils.fw.get_player_id = get_player_id
 utils.fw.get_id_params = get_id_params
 utils.fw.get_insert_params = get_insert_params
+utils.fw.get_item = get_item
 utils.fw.has_item = has_item
 utils.fw.get_balances = get_balances
 utils.fw.get_balance_by_type = get_balance_by_type
@@ -547,3 +830,7 @@ utils.fw.adjust_balance = adjust_balance
 utils.fw.adjust_inventory = adjust_inventory
 utils.fw.get_identity = get_identity
 utils.fw.get_identity_by_id = get_identity_by_id
+utils.fw.get_player_jobs = get_player_jobs
+utils.fw.player_has_job = player_has_job
+utils.fw.get_player_job_grade = get_player_job_grade
+utils.fw.count_players_by_job = count_players_by_job
