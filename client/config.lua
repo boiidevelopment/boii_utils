@@ -22,7 +22,7 @@ utils.callbacks = {}
 --- @section Settings
 
 --- Framework configuration.
--- @field config.framework Specifies the active framework. Options: 'boii_rp', 'qb-core', 'ox_core', 'esx_legacy', 'custom'.
+-- @field config.framework Specifies the active framework. Options: 'boii_rp', 'qb-core', 'ox_core', 'es_extended', 'custom'.
 config.framework = 'boii_rp'
 
 --- Notification system configuration.
@@ -32,7 +32,7 @@ config.notifications = 'boii_ui'
 --- Disable settings
 -- @field frameworks: Disables framework bridge functions to allow resource to be entirely standalone
 config.disable = {
-    frameworks = false, 
+    frameworks = false,
 }
 
 --- Debug configuration settings.

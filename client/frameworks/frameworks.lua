@@ -1,11 +1,11 @@
 --[[
-     ____   ____ _____ _____   _   _____  ________      ________ _      ____  _____  __  __ ______ _   _ _______ 
+     ____   ____ _____ _____   _   _____  ________      ________ _      ____  _____  __  __ ______ _   _ _______
     |  _ \ / __ \_   _|_   _| | | |  __ \|  ____\ \    / /  ____| |    / __ \|  __ \|  \/  |  ____| \ | |__   __|
-    | |_) | |  | || |   | |   | | | |  | | |__   \ \  / /| |__  | |   | |  | | |__) | \  / | |__  |  \| |  | |   
-    |  _ <| |  | || |   | |   | | | |  | |  __|   \ \/ / |  __| | |   | |  | |  ___/| |\/| |  __| | . ` |  | |   
-    | |_) | |__| || |_ _| |_  | | | |__| | |____   \  /  | |____| |___| |__| | |    | |  | | |____| |\  |  | |   
-    |____/ \____/_____|_____| | | |_____/|______|   \/   |______|______\____/|_|    |_|  |_|______|_| \_|  |_|   
-                              | |                                                                                
+    | |_) | |  | || |   | |   | | | |  | | |__   \ \  / /| |__  | |   | |  | | |__) | \  / | |__  |  \| |  | |
+    |  _ <| |  | || |   | |   | | | |  | |  __|   \ \/ / |  __| | |   | |  | |  ___/| |\/| |  __| | . ` |  | |
+    | |_) | |__| || |_ _| |_  | | | |__| | |____   \  /  | |____| |___| |__| | |    | |  | | |____| |\  |  | |
+    |____/ \____/_____|_____| | | |_____/|______|   \/   |______|______\____/|_|    |_|  |_|______|_| \_|  |_|
+                              | |
                               |_|             DEVELOPER UTILS
 ]]
 
@@ -25,10 +25,10 @@ if config.disable.frameworks then return end
 --- Assigning config.framework to framework for brevity.
 -- Framework setting can be changed within the config files.
 -- @see client/config.lua & server/config.lua
-FRAMEWORK = config.framework
+local FRAMEWORK = config.framework
 
 --- Initializes the connection to the specified framework when the resource starts.
--- Supports 'boii_rp', 'qb-core', 'esx_legacy', 'ox_core', and custom frameworks *(provided you fill this in of course)*.
+-- Supports 'boii_rp', 'qb-core', 'es_extended', 'ox_core', and custom frameworks *(provided you fill this in of course)*.
 CreateThread(function()
     while GetResourceState(FRAMEWORK) ~= 'started' do
         Wait(500)
@@ -37,17 +37,17 @@ CreateThread(function()
     -- Initialize the framework based on the configuration.
     -- Extend this if-block to add support for additional frameworks.
     if FRAMEWORK == 'boii_rp' then
-        fw = exports['boii_rp']:get_object()
+        utils.fw = exports['boii_rp']:get_object()
     elseif FRAMEWORK == 'qb-core' then
-        fw = exports['qb-core']:GetCoreObject()
-    elseif FRAMEWORK == 'esx_legacy' then
-        fw = exports['es_extended']:getSharedObject()
+        utils.fw = exports['qb-core']:GetCoreObject()
+    elseif FRAMEWORK == 'es_extended' then
+        utils.fw = exports['es_extended']:getSharedObject()
     elseif FRAMEWORK == 'ox_core' then
         local file = ('imports/%s.lua'):format(IsDuplicityVersion() and 'server' or 'client')
         local import = LoadResourceFile('ox_core', file)
         local chunk = assert(load(import, ('@@ox_core/%s'):format(file)))
         chunk()
-        fw = Ox
+        utils.fw = Ox
     elseif FRAMEWORK == 'custom' then
         -- Custom framework initialization
     end
@@ -65,13 +65,13 @@ end)
 local function get_data(key)
     local player_data
     if FRAMEWORK == 'boii_rp' then
-        player_data = fw.get_data(key)
+        player_data = utils.fw.get_data(key)
     elseif FRAMEWORK == 'qb-core' then
-        player_data = fw.Functions.GetPlayerData()
-    elseif FRAMEWORK == 'esx_legacy' then
-        player_data = fw.GetPlayerData()
+        player_data = utils.fw.Functions.GetPlayerData()
+    elseif FRAMEWORK == 'es_extended' then
+        player_data = utils.fw.GetPlayerData()
     elseif FRAMEWORK == 'ox_core' then
-        player_data = fw.GetPlayerData()
+        player_data = utils.fw.GetPlayerData()
     elseif FRAMEWORK == 'custom' then
         -- Custom framework logic
     end
@@ -104,12 +104,12 @@ local function get_identity()
             sex = player.charinfo.gender,
             nationality = player.charinfo.nationality
         }
-    elseif FRAMEWORK == 'esx_legacy' then
+    elseif FRAMEWORK == 'es_extended' then
         player_data = {
-            first_name = fw.PlayerData.firstName,
-            last_name = fw.PlayerData.lastName,
-            dob = fw.PlayerData.dateofbirth,
-            sex = fw.PlayerData.sex,
+            first_name = utils.fw.PlayerData.firstName,
+            last_name = utils.fw.PlayerData.lastName,
+            dob = utils.fw.PlayerData.dateofbirth,
+            sex = utils.fw.PlayerData.sex,
             nationality = 'LS, Los Santos'
         }
     elseif FRAMEWORK == 'ox_core' then

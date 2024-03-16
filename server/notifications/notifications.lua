@@ -1,11 +1,11 @@
 --[[
-     ____   ____ _____ _____   _   _____  ________      ________ _      ____  _____  __  __ ______ _   _ _______ 
+     ____   ____ _____ _____   _   _____  ________      ________ _      ____  _____  __  __ ______ _   _ _______
     |  _ \ / __ \_   _|_   _| | | |  __ \|  ____\ \    / /  ____| |    / __ \|  __ \|  \/  |  ____| \ | |__   __|
-    | |_) | |  | || |   | |   | | | |  | | |__   \ \  / /| |__  | |   | |  | | |__) | \  / | |__  |  \| |  | |   
-    |  _ <| |  | || |   | |   | | | |  | |  __|   \ \/ / |  __| | |   | |  | |  ___/| |\/| |  __| | . ` |  | |   
-    | |_) | |__| || |_ _| |_  | | | |__| | |____   \  /  | |____| |___| |__| | |    | |  | | |____| |\  |  | |   
-    |____/ \____/_____|_____| | | |_____/|______|   \/   |______|______\____/|_|    |_|  |_|______|_| \_|  |_|   
-                              | |                                                                                
+    | |_) | |  | || |   | |   | | | |  | | |__   \ \  / /| |__  | |   | |  | | |__) | \  / | |__  |  \| |  | |
+    |  _ <| |  | || |   | |   | | | |  | |  __|   \ \/ / |  __| | |   | |  | |  ___/| |\/| |  __| | . ` |  | |
+    | |_) | |__| || |_ _| |_  | | | |__| | |____   \  /  | |____| |___| |__| | |    | |  | | |____| |\  |  | |
+    |____/ \____/_____|_____| | | |_____/|______|   \/   |______|______\____/|_|    |_|  |_|______|_| \_|  |_|
+                              | |
                               |_|             DEVELOPER UTILS
 ]]
 
@@ -22,19 +22,20 @@ local NOTIFICATIONS = config.notifications
 
 --- Sends a notification to player based on current notification settings
 -- @param _src: The players source.
--- @param options table: Table of notification data to be used by notification systems 
+-- @param options table: Table of notification data to be used by notification systems
 local function send(_src, options)
     if NOTIFICATIONS == 'boii_ui' then
         if options.type == 'info' or options.type == 'primary' then
             options.type = 'information'
         end
-        TriggerClientEvent('boii_ui:notify', _src, { type = options.type, header = options.header, message = options.message, duration = options.duration })
+        TriggerClientEvent('boii_ui:notify', _src,
+            { type = options.type, header = options.header, message = options.message, duration = options.duration })
     elseif NOTIFICATIONS == 'qb-core' then
         if options.type == 'information' or options.type == 'info' then
             options.type = 'primary'
         end
         TriggerClientEvent('QBCore:Notify', _src, options.message, options.type, options.duration)
-    elseif NOTIFICATIONS == 'esx_legacy' then
+    elseif NOTIFICATIONS == 'es_extended' then
         if options.type == 'information' or options.type == 'primary' then
             options.type = 'info'
         end
@@ -43,7 +44,8 @@ local function send(_src, options)
         if options.type == 'information' or options.type == 'primary' then
             options.type = 'info'
         end
-        TriggerClientEvent('ox_lib:notify', _src, { type = options.type, title = options.header, description = options.message })
+        TriggerClientEvent('ox_lib:notify', _src,
+            { type = options.type, title = options.header, description = options.message })
     end
 end
 
