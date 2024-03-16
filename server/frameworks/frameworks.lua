@@ -26,7 +26,6 @@ if config.disable.frameworks then return end
 -- Framework setting can be changed within the config files.
 -- @see client/config.lua & server/config.lua
 local FRAMEWORK = config.framework
-local fw
 
 --- Initializes the connection to the specified framework when the resource starts.
 -- Supports 'boii_rp', 'qb-core', 'es_extended', 'ox_core', and custom frameworks *(provided you fill this in of course)*.
@@ -38,17 +37,17 @@ CreateThread(function()
     -- Initialize the framework based on the configuration.
     -- Extend this if-block to add support for additional frameworks.
     if FRAMEWORK == 'boii_rp' then
-        fw = exports['boii_rp']:get_object()
+        utils.fw = exports['boii_rp']:get_object()
     elseif FRAMEWORK == 'qb-core' then
-        fw = exports['qb-core']:GetCoreObject()
+        utils.fw = exports['qb-core']:GetCoreObject()
     elseif FRAMEWORK == 'es_extended' then
-        fw = exports['es_extended']:getSharedObject()
+        utils.fw = exports['es_extended']:getSharedObject()
     elseif FRAMEWORK == 'ox_core' then
         local file = ('imports/%s.lua'):format(IsDuplicityVersion() and 'server' or 'client')
         local import = LoadResourceFile('ox_core', file)
         local chunk = assert(load(import, ('@@ox_core/%s'):format(file)))
         chunk()
-        fw = Ox
+        utils.fw = Ox
     elseif FRAMEWORK == 'custom' then
         -- Custom framework initialization
     end
@@ -63,13 +62,13 @@ end)
 local function get_players()
     local players = {}
     if FRAMEWORK == 'boii_rp' then
-        players = fw.get_players()
+        players = utils.fw.get_players()
     elseif FRAMEWORK == 'qb-core' then
-        players = fw.Functions.GetPlayers()
+        players = utils.fw.Functions.GetPlayers()
     elseif FRAMEWORK == 'es_extended' then
-        players = fw.GetPlayers()
+        players = utils.fw.GetPlayers()
     elseif FRAMEWORK == 'ox_core' then
-        players = fw.GetPlayers()
+        players = utils.fw.GetPlayers()
     elseif FRAMEWORK == 'custom' then
         -- Custom framework logic
     end
@@ -79,17 +78,17 @@ end
 --- Retrieves player data from the server based on the framework.
 -- @param _src Player source identifier.
 -- @return Player data object.
--- @usage local player = utils.fw.get_player(player_source)
+-- @usage local player = utils.utils.fw.get_player(player_source)
 local function get_player(_src)
     local player
     if FRAMEWORK == 'boii_rp' then
-        player = fw.get_player(_src)
+        player = utils.fw.get_player(_src)
     elseif FRAMEWORK == 'qb-core' then
-        player = fw.Functions.GetPlayer(_src)
+        player = utils.fw.Functions.GetPlayer(_src)
     elseif FRAMEWORK == 'es_extended' then
-        player = fw.GetPlayerFromId(_src)
+        player = utils.fw.GetPlayerFromId(_src)
     elseif FRAMEWORK == 'ox_core' then
-        player = fw.GetPlayer(_src)
+        player = utils.fw.GetPlayer(_src)
     elseif FRAMEWORK == 'custom' then
         -- Custom framework logic
     end
@@ -99,7 +98,7 @@ end
 --- Retrieves player id from the server based on the framework.
 -- @param _src Player source identifier.
 -- @return Player's main identifier.
--- @usage local player = utils.fw.get_player_id(player_source)
+-- @usage local player = utils.utils.fw.get_player_id(player_source)
 local function get_player_id(_src)
     local player = get_player(_src)
     if not player then
@@ -126,7 +125,7 @@ end
 -- Useful for consistent database operations across different frameworks.
 -- @param _src Player source identifier.
 -- @return Query part and parameters suitable for the configured framework.
--- @usage local query, params = utils.fw.get_id_params(player_source)
+-- @usage local query, params = utils.utils.fw.get_id_params(player_source)
 local function get_id_params(_src)
     local player = get_player(_src)
     local query, params
@@ -155,7 +154,7 @@ end
 -- @param data_name The name of the data field.
 -- @param data The data to insert.
 -- @return Columns, values, and parameters suitable for the configured framework.
--- @usage local columns, values, params = utils.fw.get_insert_params(_src, 'data_type', 'data_name', data)
+-- @usage local columns, values, params = utils.utils.fw.get_insert_params(_src, 'data_type', 'data_name', data)
 local function get_insert_params(_src, data_type, data_name, data)
     local player = get_player(_src)
     local columns, values, params
@@ -186,7 +185,7 @@ end
 -- @param item_name Name of the item to check.
 -- @param item_amount (Optional) Amount of the item to check for.
 -- @return True if the player has the item (and amount), False otherwise.
--- @usage local has_item = utils.fw.has_item(_src, 'item_name', item_amount)
+-- @usage local has_item = utils.utils.fw.has_item(_src, 'item_name', item_amount)
 local function has_item(_src, item_name, item_amount)
     local player = get_player(_src)
     if not player then return false end
@@ -216,7 +215,7 @@ end
 -- @param _src Player source identifier.
 -- @param item_name Name of the item to retrieve.
 -- @return Item object if found, nil otherwise.
--- @usage local item = utils.fw.get_item(_src, 'item_name')
+-- @usage local item = utils.utils.fw.get_item(_src, 'item_name')
 local function get_item(_src, item_name)
     local player = get_player(_src)
     if not player then return nil end -- Player not found, return nil
@@ -251,7 +250,7 @@ local items = {
     {item_id = 'water', action = 'remove', quantity = 1},
 }
 local validation_data = { location = vector3(100.0, 100.0, 20.0), distance = 10.0, drop_player = true }
-utils.fw.adjust_inventory({
+utils.utils.fw.adjust_inventory({
     items = items,
     validation_data = validation_data,
     note = 'Used a pawnshop.',
@@ -317,7 +316,7 @@ end
 --- Retrieves the balances of a player based on the framework.
 -- @param _src Player source identifier.
 -- @return A table of balances by type.
--- @usage local balances = utils.fw.get_balances(player_source)
+-- @usage local balances = utils.utils.fw.get_balances(player_source)
 local function get_balances(_src)
     local player = get_player(_src)
     if not player then return false end
@@ -345,7 +344,7 @@ end
 -- @param _src Player source identifier.
 -- @param balance_type The type of balance to retrieve.
 -- @return The balance amount for the specified type.
--- @usage local balance = utils.fw.get_balance_by_type(player_source, 'balance_type')
+-- @usage local balance = utils.utils.fw.get_balance_by_type(player_source, 'balance_type')
 local function get_balance_by_type(_src, balance_type)
     local balances = get_balances(_src)
     if not balances then return false end
@@ -377,7 +376,7 @@ local operations = {
     {balance_type = 'savings', action = 'add', amount = 1000}
 }
 local validation_data = { location = vector3(100.0, 100.0, 20.0), distance = 10.0, drop_player = true }
-utils.fw.adjust_balance(_src, {
+utils.utils.fw.adjust_balance(_src, {
     operations = operations,
     validation_data = validation_data,
     reason = 'Transfer from bank to savings',
@@ -441,7 +440,7 @@ end
 --- Retrieves a player's identity information depending on the framework.
 -- @param _src Player source identifier.
 -- @return A table of identity information.
--- @usage local identity = utils.fw.get_identity(_src)
+-- @usage local identity = utils.utils.fw.get_identity(_src)
 local function get_identity(_src)
     local player = get_player(_src)
     if not player then return false end
@@ -489,7 +488,7 @@ end
 --- Retrieves a player's identity information by their id (citizenid, unique_id+char_id, etc..)
 -- @param user_id: The id of the user to retrieve identity information for.
 -- @return A table of identity information.
--- @usage local identity = utils.fw.get_identity_by_id('boii_12345_1')
+-- @usage local identity = utils.utils.fw.get_identity_by_id('boii_12345_1')
 local function get_identity_by_id(user_id)
     local players = get_players()
     for _, player in ipairs(players) do
@@ -832,20 +831,20 @@ create_licence_tables()
 
 utils.fw = utils.fw or {}
 
-utils.fw.get_players = get_players
-utils.fw.get_player = get_player
-utils.fw.get_player_id = get_player_id
-utils.fw.get_id_params = get_id_params
-utils.fw.get_insert_params = get_insert_params
-utils.fw.get_item = get_item
-utils.fw.has_item = has_item
-utils.fw.get_balances = get_balances
-utils.fw.get_balance_by_type = get_balance_by_type
-utils.fw.adjust_balance = adjust_balance
-utils.fw.adjust_inventory = adjust_inventory
-utils.fw.get_identity = get_identity
-utils.fw.get_identity_by_id = get_identity_by_id
-utils.fw.get_player_jobs = get_player_jobs
-utils.fw.player_has_job = player_has_job
-utils.fw.get_player_job_grade = get_player_job_grade
-utils.fw.count_players_by_job = count_players_by_job
+utils.utils.fw.get_players = get_players
+utils.utils.fw.get_player = get_player
+utils.utils.fw.get_player_id = get_player_id
+utils.utils.fw.get_id_params = get_id_params
+utils.utils.fw.get_insert_params = get_insert_params
+utils.utils.fw.get_item = get_item
+utils.utils.fw.has_item = has_item
+utils.utils.fw.get_balances = get_balances
+utils.utils.fw.get_balance_by_type = get_balance_by_type
+utils.utils.fw.adjust_balance = adjust_balance
+utils.utils.fw.adjust_inventory = adjust_inventory
+utils.utils.fw.get_identity = get_identity
+utils.utils.fw.get_identity_by_id = get_identity_by_id
+utils.utils.fw.get_player_jobs = get_player_jobs
+utils.utils.fw.player_has_job = player_has_job
+utils.utils.fw.get_player_job_grade = get_player_job_grade
+utils.utils.fw.count_players_by_job = count_players_by_job
