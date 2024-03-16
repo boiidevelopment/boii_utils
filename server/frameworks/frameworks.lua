@@ -830,21 +830,20 @@ create_licence_tables()
 --- @section Assign local functions
 
 utils.fw = utils.fw or {}
-
 utils.utils.fw.get_players = get_players
-utils.utils.fw.get_player = get_player
-utils.utils.fw.get_player_id = get_player_id
-utils.utils.fw.get_id_params = get_id_params
-utils.utils.fw.get_insert_params = get_insert_params
-utils.utils.fw.get_item = get_item
-utils.utils.fw.has_item = has_item
-utils.utils.fw.get_balances = get_balances
-utils.utils.fw.get_balance_by_type = get_balance_by_type
-utils.utils.fw.adjust_balance = adjust_balance
-utils.utils.fw.adjust_inventory = adjust_inventory
-utils.utils.fw.get_identity = get_identity
-utils.utils.fw.get_identity_by_id = get_identity_by_id
-utils.utils.fw.get_player_jobs = get_player_jobs
-utils.utils.fw.player_has_job = player_has_job
-utils.utils.fw.get_player_job_grade = get_player_job_grade
-utils.utils.fw.count_players_by_job = count_players_by_job
+utils.fw.get_player = get_player
+utils.fw.get_player_id = get_player_id
+utils.fw.get_id_params = get_id_params
+utils.fw.get_insert_params = get_insert_params
+utils.fw.get_item = get_item
+utils.fw.has_item = has_item
+utils.fw.get_balances = get_balances
+utils.fw.get_balance_by_type = get_balance_by_type
+utils.fw.adjust_balance = adjust_balance
+utils.fw.adjust_inventory = adjust_inventory
+utils.fw.get_identity = get_identity
+utils.fw.get_identity_by_id = get_identity_by_id
+utils.fw.get_player_jobs = get_player_jobs
+utils.fw.player_has_job = player_has_job
+utils.fw.get_player_job_grade = get_player_job_grade
+utils.fw.count_players_by_job = count_players_by_job
