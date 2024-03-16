@@ -26,7 +26,6 @@ if config.disable.frameworks then return end
 -- Framework setting can be changed within the config files.
 -- @see client/config.lua & server/config.lua
 local FRAMEWORK = config.framework
-local fw
 
 --- Initializes the connection to the specified framework when the resource starts.
 -- Supports 'boii_rp', 'qb-core', 'es_extended', 'ox_core', and custom frameworks *(provided you fill this in of course)*.
@@ -38,17 +37,17 @@ CreateThread(function()
     -- Initialize the framework based on the configuration.
     -- Extend this if-block to add support for additional frameworks.
     if FRAMEWORK == 'boii_rp' then
-        fw = exports['boii_rp']:get_object()
+        utils.fw = exports['boii_rp']:get_object()
     elseif FRAMEWORK == 'qb-core' then
-        fw = exports['qb-core']:GetCoreObject()
+        utils.fw = exports['qb-core']:GetCoreObject()
     elseif FRAMEWORK == 'es_extended' then
-        fw = exports['es_extended']:getSharedObject()
+        utils.fw = exports['es_extended']:getSharedObject()
     elseif FRAMEWORK == 'ox_core' then
         local file = ('imports/%s.lua'):format(IsDuplicityVersion() and 'server' or 'client')
         local import = LoadResourceFile('ox_core', file)
         local chunk = assert(load(import, ('@@ox_core/%s'):format(file)))
         chunk()
-        fw = Ox
+        utils.fw = Ox
     elseif FRAMEWORK == 'custom' then
         -- Custom framework initialization
     end
