@@ -65,13 +65,13 @@ end)
 local function get_data(key)
     local player_data
     if FRAMEWORK == 'boii_rp' then
-        player_data = fw.get_data(key)
+        player_data = utils.fw.get_data(key)
     elseif FRAMEWORK == 'qb-core' then
-        player_data = fw.Functions.GetPlayerData()
+        player_data = utils.fw.Functions.GetPlayerData()
     elseif FRAMEWORK == 'es_extended' then
-        player_data = fw.GetPlayerData()
+        player_data = utils.fw.GetPlayerData()
     elseif FRAMEWORK == 'ox_core' then
-        player_data = fw.GetPlayerData()
+        player_data = utils.fw.GetPlayerData()
     elseif FRAMEWORK == 'custom' then
         -- Custom framework logic
     end
@@ -106,10 +106,10 @@ local function get_identity()
         }
     elseif FRAMEWORK == 'es_extended' then
         player_data = {
-            first_name = fw.PlayerData.firstName,
-            last_name = fw.PlayerData.lastName,
-            dob = fw.PlayerData.dateofbirth,
-            sex = fw.PlayerData.sex,
+            first_name = utils.fw.PlayerData.firstName,
+            last_name = utils.fw.PlayerData.lastName,
+            dob = utils.fw.PlayerData.dateofbirth,
+            sex = utils.fw.PlayerData.sex,
             nationality = 'LS, Los Santos'
         }
     elseif FRAMEWORK == 'ox_core' then
