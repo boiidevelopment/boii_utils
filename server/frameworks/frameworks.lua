@@ -830,7 +830,8 @@ create_licence_tables()
 --- @section Assign local functions
 
 utils.fw = utils.fw or {}
-utils.utils.fw.get_players = get_players
+
+utils.fw.get_players = get_players
 utils.fw.get_player = get_player
 utils.fw.get_player_id = get_player_id
 utils.fw.get_id_params = get_id_params
