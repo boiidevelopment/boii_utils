@@ -28,7 +28,7 @@ if config.disable.frameworks then return end
 FRAMEWORK = config.framework
 
 --- Initializes the connection to the specified framework when the resource starts.
--- Supports 'boii_rp', 'qb-core', 'esx_legacy', 'ox_core', and custom frameworks *(provided you fill this in of course)*.
+-- Supports 'boii_rp', 'qb-core', 'es_extended', 'ox_core', and custom frameworks *(provided you fill this in of course)*.
 CreateThread(function()
     while GetResourceState(FRAMEWORK) ~= 'started' do
         Wait(500)
@@ -40,7 +40,7 @@ CreateThread(function()
         fw = exports['boii_rp']:get_object()
     elseif FRAMEWORK == 'qb-core' then
         fw = exports['qb-core']:GetCoreObject()
-    elseif FRAMEWORK == 'esx_legacy' then
+    elseif FRAMEWORK == 'es_extended' then
         fw = exports['es_extended']:getSharedObject()
     elseif FRAMEWORK == 'ox_core' then
         local file = ('imports/%s.lua'):format(IsDuplicityVersion() and 'server' or 'client')
@@ -66,7 +66,7 @@ local function get_players()
         players = fw.get_players()
     elseif FRAMEWORK == 'qb-core' then
         players = fw.Functions.GetPlayers()
-    elseif FRAMEWORK == 'esx_legacy' then
+    elseif FRAMEWORK == 'es_extended' then
         players = fw.GetPlayers()
     elseif FRAMEWORK == 'ox_core' then
         players = fw.GetPlayers()
@@ -86,7 +86,7 @@ local function get_player(_src)
         player = fw.get_player(_src)
     elseif FRAMEWORK == 'qb-core' then
         player = fw.Functions.GetPlayer(_src)
-    elseif FRAMEWORK == 'esx_legacy' then
+    elseif FRAMEWORK == 'es_extended' then
         player = fw.GetPlayerFromId(_src)
     elseif FRAMEWORK == 'ox_core' then
         player = fw.GetPlayer(_src)
@@ -109,7 +109,7 @@ local function get_player_id(_src)
         player_id = player.unique_id..'_'..player.char_id -- place holder until boii_rp has a state id 
     elseif FRAMEWORK == 'qb-core' then
         player_id = player.PlayerData.citizenid
-    elseif FRAMEWORK == 'esx_legacy' then
+    elseif FRAMEWORK == 'es_extended' then
         player_id = player.identifier
     elseif FRAMEWORK == 'ox_core' then
         player_id = player.stateId
@@ -133,7 +133,7 @@ local function get_id_params(_src)
     elseif FRAMEWORK == 'qb-core' then
         query = 'citizenid = ?'
         params = { player.PlayerData.citizenid }
-    elseif FRAMEWORK == 'esx_legacy' then
+    elseif FRAMEWORK == 'es_extended' then
         query = 'identifier = ?'
         params = { player.identifier }
     elseif FRAMEWORK == 'ox_core' then
@@ -164,7 +164,7 @@ local function get_insert_params(_src, data_type, data_name, data)
         columns = {'citizenid', data_type}
         values = '?, ?'
         params = { player.PlayerData.citizenid, json.encode(data) }
-    elseif FRAMEWORK == 'esx_legacy' then
+    elseif FRAMEWORK == 'es_extended' then
         columns = {'identifier', data_type}
         values = '?, ?'
         params = { player.identifier, json.encode(data) }
@@ -196,7 +196,7 @@ local function has_item(_src, item_name, item_amount)
     elseif FRAMEWORK == 'qb-core' then
         local item = player.Functions.GetItemByName(item_name)
         return item ~= nil and item.amount >= required_amount
-    elseif FRAMEWORK == 'esx_legacy' then
+    elseif FRAMEWORK == 'es_extended' then
         local item = player.getInventoryItem(item_name)
         return item ~= nil and item.count >= required_amount
     elseif FRAMEWORK == 'ox_core' then
@@ -223,7 +223,7 @@ local function get_item(_src, item_name)
         item = player.get_inventory_item(item_name)
     elseif FRAMEWORK == 'qb-core' then
         item = player.Functions.GetItemByName(item_name)
-    elseif FRAMEWORK == 'esx_legacy' then
+    elseif FRAMEWORK == 'es_extended' then
         item = player.getInventoryItem(item_name)
     elseif FRAMEWORK == 'ox_core' then
         local items = exports.ox_inventory:Search(_src, 'items', item_name)
@@ -266,7 +266,7 @@ local function adjust_inventory(_src, options)
                 if item.action == 'add' then
                     if FRAMEWORK == 'qb-core' then
                         player.Functions.AddItem(item.item_id, item.quantity, nil, item.data)
-                    elseif FRAMEWORK == 'esx_legacy' then
+                    elseif FRAMEWORK == 'es_extended' then
                         player.addInventoryItem(item.item_id, item.quantity)
                     elseif FRAMEWORK == 'ox_core' then
                         exports.ox_inventory:AddItem(_src, item.item_id, item.quantity, item.data)
@@ -276,7 +276,7 @@ local function adjust_inventory(_src, options)
                 elseif item.action == 'remove' then
                     if FRAMEWORK == 'qb-core' then
                         player.Functions.RemoveItem(item.item_id, item.quantity)
-                    elseif FRAMEWORK == 'esx_legacy' then
+                    elseif FRAMEWORK == 'es_extended' then
                         player.removeInventoryItem(item.item_id, item.quantity)
                     elseif FRAMEWORK == 'ox_core' then
                         exports.ox_inventory:RemoveItem(_src, item.item_id, item.quantity, item.data)
@@ -322,7 +322,7 @@ local function get_balances(_src)
         balances = player.balances
     elseif FRAMEWORK == 'qb-core' then
         balances = player.PlayerData.money
-    elseif FRAMEWORK == 'esx_legacy' then
+    elseif FRAMEWORK == 'es_extended' then
         if player then
             for _, account in pairs(player.getAccounts()) do
                 balances[account.name] = account.money
@@ -350,7 +350,7 @@ local function get_balance_by_type(_src, balance_type)
         balance = balances[balance_type].amount
     elseif FRAMEWORK == 'qb-core' then
         balance = balances[balance_type]
-    elseif FRAMEWORK == 'esx_legacy' then
+    elseif FRAMEWORK == 'es_extended' then
         balance = balances[balance_type]
     elseif FRAMEWORK == 'ox_core' then  
         balance = balances
@@ -390,7 +390,7 @@ local function adjust_balance(_src, options)
                 if op.action == 'add' then
                     if FRAMEWORK == 'qb-core' then
                         player.Functions.AddMoney(op.balance_type, op.amount, options.reason)
-                    elseif FRAMEWORK == 'esx_legacy' then
+                    elseif FRAMEWORK == 'es_extended' then
                         player.addAccountMoney(op.balance_type, op.amount)
                     elseif FRAMEWORK == 'ox_core' then
                         exports.ox_inventory:AddItem(_src, 'money', op.amount)
@@ -400,7 +400,7 @@ local function adjust_balance(_src, options)
                 elseif op.action == 'remove' then
                     if FRAMEWORK == 'qb-core' then
                         player.Functions.RemoveMoney(op.balance_type, op.amount, options.reason)
-                    elseif FRAMEWORK == 'esx_legacy' then
+                    elseif FRAMEWORK == 'es_extended' then
                         player.removeAccountMoney(op.balance_type, op.amount)
                     elseif FRAMEWORK == 'ox_core' then
                         exports.ox_inventory:RemoveItem(_src, 'money', op.amount)
@@ -459,7 +459,7 @@ local function get_identity(_src)
             sex = player.PlayerData.charinfo.gender,
             nationality = player.PlayerData.charinfo.nationality
         }
-    elseif FRAMEWORK == 'esx_legacy' then
+    elseif FRAMEWORK == 'es_extended' then
         player_data = {
             first_name = player.variables.firstName,
             last_name = player.variables.lastName,
@@ -508,7 +508,7 @@ local function get_player_jobs(_src)
             player_jobs = player.data.jobs
         elseif FRAMEWORK == 'qb-core' then
             player_jobs = player.PlayerData.job
-        elseif FRAMEWORK == 'esx_legacy' then
+        elseif FRAMEWORK == 'es_extended' then
             player_jobs = player.getJob()
         elseif FRAMEWORK == 'ox_core' then
             player_jobs = player.getGroups()
@@ -551,7 +551,7 @@ local function player_has_job(_src, job_names, check_on_duty)
             job_found = true
             on_duty_status = player_jobs.onduty
         end
-    elseif FRAMEWORK == 'esx_legacy' then
+    elseif FRAMEWORK == 'es_extended' then
         if utils.tables.table_contains(job_names, player_jobs.id) then
             job_found = true
             on_duty_status = player_jobs.onDuty
@@ -590,7 +590,7 @@ local function get_player_job_grade(_src, job_id)
         if player_jobs.name == job_id then
             return player_jobs.grade.level
         end
-    elseif FRAMEWORK == 'esx_legacy' then
+    elseif FRAMEWORK == 'es_extended' then
         if player_jobs.id == job_id then
             return player_jobs.grade
         end
@@ -697,7 +697,7 @@ local function create_skill_tables()
                 PRIMARY KEY (`citizenid`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
         ]], config.skills.sql.table_name)
-    elseif FRAMEWORK == 'esx_legacy' then 
+    elseif FRAMEWORK == 'es_extended' then 
         query = string.format([[
             CREATE TABLE IF NOT EXISTS `%s` (
                 `identifier` varchar(60) NOT NULL,
@@ -746,7 +746,7 @@ local function create_rep_tables()
                 PRIMARY KEY (`citizenid`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
         ]], config.reputation.sql.table_name)
-    elseif FRAMEWORK == 'esx_legacy' then 
+    elseif FRAMEWORK == 'es_extended' then 
         query = string.format([[
             CREATE TABLE IF NOT EXISTS `%s` (
                 `identifier` varchar(60) NOT NULL,
@@ -796,7 +796,7 @@ local function create_licence_tables()
                 PRIMARY KEY (`citizenid`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
         ]], config.licences.sql.table_name)
-    elseif FRAMEWORK == 'esx_legacy' then 
+    elseif FRAMEWORK == 'es_extended' then 
         query = string.format([[
             CREATE TABLE IF NOT EXISTS `%s` (
                 `identifier` varchar(60) NOT NULL,
