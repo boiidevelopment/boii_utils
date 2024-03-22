@@ -28,7 +28,7 @@ if config.disable.frameworks then return end
 FRAMEWORK = config.framework
 
 --- Initializes the connection to the specified framework when the resource starts.
--- Supports 'boii_rp', 'qb-core', 'esx_legacy', 'ox_core', and custom frameworks *(provided you fill this in of course)*.
+-- Supports 'boii_rp', 'qb-core', 'es_extended', 'ox_core', and custom frameworks *(provided you fill this in of course)*.
 CreateThread(function()
     while GetResourceState(FRAMEWORK) ~= 'started' do
         Wait(500)
@@ -40,7 +40,7 @@ CreateThread(function()
         fw = exports['boii_rp']:get_object()
     elseif FRAMEWORK == 'qb-core' then
         fw = exports['qb-core']:GetCoreObject()
-    elseif FRAMEWORK == 'esx_legacy' then
+    elseif FRAMEWORK == 'es_extended' then
         fw = exports['es_extended']:getSharedObject()
     elseif FRAMEWORK == 'ox_core' then
         local file = ('imports/%s.lua'):format(IsDuplicityVersion() and 'server' or 'client')
@@ -68,7 +68,7 @@ local function get_data(key)
         player_data = fw.get_data(key)
     elseif FRAMEWORK == 'qb-core' then
         player_data = fw.Functions.GetPlayerData()
-    elseif FRAMEWORK == 'esx_legacy' then
+    elseif FRAMEWORK == 'es_extended' then
         player_data = fw.GetPlayerData()
     elseif FRAMEWORK == 'ox_core' then
         player_data = fw.GetPlayerData()
@@ -104,7 +104,7 @@ local function get_identity()
             sex = player.charinfo.gender,
             nationality = player.charinfo.nationality
         }
-    elseif FRAMEWORK == 'esx_legacy' then
+    elseif FRAMEWORK == 'es_extended' then
         player_data = {
             first_name = fw.PlayerData.firstName,
             last_name = fw.PlayerData.lastName,
