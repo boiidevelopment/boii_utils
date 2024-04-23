@@ -106,7 +106,7 @@ local function get_player_id(_src)
 
     local player_id
     if FRAMEWORK == 'boii_rp' then
-        player_id = player.unique_id..'_'..player.char_id -- place holder until boii_rp has a state id 
+        player_id = player.passport
     elseif FRAMEWORK == 'qb-core' then
         player_id = player.PlayerData.citizenid
     elseif FRAMEWORK == 'es_extended' then
@@ -189,7 +189,7 @@ local function has_item(_src, item_name, item_amount)
     if not player then return false end
 
     local required_amount = item_amount or 1
-
+    
     if FRAMEWORK == 'boii_rp' then
         local item = player.get_inventory_item(item_name)
         return item ~= nil and item.quantity >= required_amount
@@ -319,7 +319,7 @@ local function get_balances(_src)
 
     local balances = {}
     if FRAMEWORK == 'boii_rp' then
-        balances = player.balances
+        balances = player.data.balances
     elseif FRAMEWORK == 'qb-core' then
         balances = player.PlayerData.money
     elseif FRAMEWORK == 'es_extended' then
@@ -623,6 +623,65 @@ local function count_players_by_job(job_names, check_on_duty)
     return total_with_job, total_on_duty
 end
 
+--- Modifies a players server side statuses.
+-- @param _src The player's source identifier.
+-- @param statuses The statuses to modify.
+local function adjust_statuses(_src, statuses)
+    local player = get_player(_src)
+    if not player then print('player not found') return end
+    
+    if FRAMEWORK == 'boii_rp' or STATUSES == 'boii_statuses' then
+        local player_statuses = exports.boii_statuses:get_player(_src)
+        player_statuses.modify_statuses(statuses)
+        return
+    end
+    
+    if FRAMEWORK == 'qb-core' then
+        for key, mod in pairs(statuses) do
+            if player.PlayerData.metadata[key] then
+                local current = player.PlayerData.metadata[key]
+                local new_value = math.min(100, math.max(0, current + (mod.add or 0) - (mod.remove or 0)))
+                player.Functions.SetMetaData(key, new_value)
+            end
+        end
+    elseif FRAMEWORK == 'es_extended' then
+        for key, mod in pairs(statuses) do
+            TriggerEvent('esx_status:getStatus', _src, key, function(status)
+                local new_val = math.max(0, status.getPercent() + (mod.add or 0) - (mod.remove or 0))
+                status.setPercent(new_val)
+            end)
+        end
+    elseif FRAMEWORK == 'ox_core' then
+        -- @todo Add ox core status logic
+    elseif FRAMEWORK == 'custom' then
+        -- Add your own custom logic here
+    end
+end
+
+--- Updates the inventory for a player, specifically focusing on weapons and ammo.
+-- @param _src The player's source identifier.
+-- @param item_id The ID of the item (weapon) to update.
+-- @param updates Table containing updates like ammo count, attachments etc.
+local function update_inventory_data(_src, item_id, updates)
+    local player = get_player(_src)
+    if not player then
+        print('Player not found')
+        return
+    end
+
+    local item = get_item(_src, item_id)
+    if not item then 
+        print('Item not found:', item_id)
+        return 
+    end
+
+    if FRAMEWORK == 'boii_rp' then
+        player.update_item_data(item_id, updates, true)
+    end
+
+    print(string.format("Inventory update completed for player %d: %s", _src, item_id))
+end
+
 --- @section Callbacks
 
 --- Callback for checking if player has item by quantity.
@@ -844,3 +903,5 @@ utils.fw.get_player_jobs = get_player_jobs
 utils.fw.player_has_job = player_has_job
 utils.fw.get_player_job_grade = get_player_job_grade
 utils.fw.count_players_by_job = count_players_by_job
+utils.fw.adjust_statuses = adjust_statuses
+utils.fw.update_inventory_data = update_inventory_data
