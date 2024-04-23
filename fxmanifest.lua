@@ -13,7 +13,7 @@ fx_version 'cerulean'
 games { 'gta5', 'rdr3' }
 
 name 'boii_utils'
-version '1.4.1'
+version '1.5.0'
 description 'BOII | Development - Developer Utility Library'
 author 'boiidevelopment'
 repository 'https://github.com/boiidevelopment/boii_utils'
@@ -39,6 +39,7 @@ server_scripts {
     '@oxmysql/lib/MySQL.lua',
     'server/config.lua',
     'server/version/version.lua',
+    'server/ui/ui.lua',
     'server/notifications/notifications.lua',
     'server/database/database.lua',
     'server/connections/connections.lua',
@@ -56,11 +57,12 @@ server_scripts {
     'server/licences/licences.lua',
     'server/items/items.lua',
     'server/commands/commands.lua',
-    'server/commands/commands_list.lua',
+    'server/commands/commands_list.lua'
 }
 
 client_scripts {
     'client/config.lua',
+    'client/ui/ui.lua',
     'client/notifications/notifications.lua',
     'client/requests/requests.lua',
     'client/player/player.lua',
@@ -81,7 +83,8 @@ client_scripts {
     'client/licences/licences.lua',
     'client/commands/commands.lua',
     'client/character_creation/creation.lua',
-    'client/test_commands.lua',
+    'client/zones/zones.lua',
+    'client/test_commands.lua'
 }
 
 escrow_ignore {
