@@ -157,6 +157,33 @@ local function do_lines_intersect(l1_start, l1_end, l2_start, l2_end)
     return ccw(l1_start, l2_start, l2_end) ~= ccw(l1_end, l2_start, l2_end) and ccw(l1_start, l1_end, l2_start) ~= ccw(l1_start, l1_end, l2_end)
 end
 
+--- Determines if a line segment intersects a circle.
+-- @function line_intersects_circle
+-- @param line_start table: Starting point of the line (x, y).
+-- @param line_end table: Ending point of the line (x, y).
+-- @param circle_center table: Center of the circle (x, y).
+-- @param circle_radius number: Radius of the circle.
+-- @return boolean: True if the line intersects the circle, false otherwise.
+local function line_intersects_circle(line_start, line_end, circle_center, circle_radius)
+    local d = {x = line_end.x - line_start.x, y = line_end.y - line_start.y}
+    local f = {x = line_start.x - circle_center.x, y = line_start.y - circle_center.y}
+    local a = d.x^2 + d.y^2
+    local b = 2 * (f.x * d.x + f.y * d.y)
+    local c = (f.x^2 + f.y^2) - circle_radius^2
+    local discriminant = b^2 - 4 * a * c
+    if discriminant >= 0 then
+        -- Line intersects the circle
+        discriminant = math.sqrt(discriminant)
+        local t1 = (-b - discriminant) / (2 * a)
+        local t2 = (-b + discriminant) / (2 * a)
+        if t1 >= 0 and t1 <= 1 or t2 >= 0 and t2 <= 1 then
+            return true
+        end
+    end
+    return false
+end
+
+
 --- Determines if a rectangle intersects with a 2D line segment.
 -- @function does_rect_intersect_line
 -- @param rect table: The rectangle (x, y, width, height).
@@ -389,6 +416,7 @@ utils.geometry.angle_between_3_points = angle_between_3_points
 utils.geometry.do_circles_intersect = do_circles_intersect
 utils.geometry.is_point_in_circle = is_point_in_circle
 utils.geometry.do_lines_intersect = do_lines_intersect
+utils.geometry.line_intersects_circle = line_intersects_circle
 utils.geometry.does_rect_intersect_line = does_rect_intersect_line
 utils.geometry.closest_point_on_line_segment = closest_point_on_line_segment
 utils.geometry.triangle_area_3d = triangle_area_3d
