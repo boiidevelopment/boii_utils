@@ -29,6 +29,11 @@ config.framework = 'boii_rp'
 -- @field config.notifications Specifies the active notification system. Options: 'boii_ui', 'qb-core', 'ox_lib', 'custom'.
 config.notifications = 'boii_ui'
 
+--- UI resource settings
+config.ui = {
+    notify = 'boii_ui' -- Options: 'boii_ui', 'qb-core', 'ox_lib', 'custom'.
+}
+
 --- Disable settings
 -- @field frameworks: Disables framework bridge functions to allow resource to be entirely standalone
 config.disable = {
