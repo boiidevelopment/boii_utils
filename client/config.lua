@@ -31,9 +31,8 @@ config.notifications = 'boii_ui'
 
 --- UI resource settings
 config.ui = {
-    notify = 'boii_ui',
-    progressbar = 'boii_ui',
-    drawtext = 'boii_ui'
+    notify = 'boii_ui', -- Options: 'boii_ui', 'qb-core', 'ox_lib', 'custom'.
+    progressbar = 'boii_ui' -- Options: 'boii_ui', 'qb-core'
 }
 
 --- Disable settings
