@@ -16,23 +16,28 @@ utils = utils or {}
 
 --- Callbacks table within utilities.
 -- Stores registered callbacks for server-client communication.
--- @field utils.callbacks Table for storing callbacks.
+-- @field utils.callbacks: Table for storing callbacks.
 utils.callbacks = {}
 
 --- @section Settings
 
 --- Framework configuration.
--- @field config.framework Specifies the active framework. Options: 'boii_rp', 'qb-core', 'ox_core', 'es_extended', 'custom'.
-config.framework = 'boii_rp'
+-- @field config.framework: Specifies the active framework. Options: 'boii_core', 'qb-core', 'ox_core', 'es_extended', 'custom'.
+config.framework = 'boii_core'
 
 --- Notification system configuration.
--- @field config.notifications Specifies the active notification system. Options: 'boii_ui', 'qb-core', 'ox_lib', 'custom'.
+-- @field config.notifications: Specifies the active notification system. Options: 'boii_ui', 'qb-core', 'ox_lib', 'custom'.
 config.notifications = 'boii_ui'
 
---- UI resource settings
 config.ui = {
-    notify = 'boii_ui' -- Options: 'boii_ui', 'qb-core', 'ox_lib', 'custom'.
+    notify = 'boii_ui',
+    progressbar = 'boii_ui',
+    drawtext = 'boii_ui'
 }
+
+--- Statuses configuration.
+-- @field config.boii_statuses: Toggle use of boii_statuses if enabled framework default statuses will be bypassed.
+config.boii_statuses = true
 
 --- Disable settings
 -- @field frameworks: Disables framework bridge functions to allow resource to be entirely standalone
