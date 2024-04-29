@@ -27,8 +27,13 @@ if config.disable.frameworks then return end
 -- @see client/config.lua & server/config.lua
 FRAMEWORK = config.framework
 
+--- Assigning config.boii_statuses to statuses for brevity.
+-- boii_statuses setting can be changed within the config files.
+-- @see server/config.lua
+BOII_STATUSES = config.boii_statuses
+
 --- Initializes the connection to the specified framework when the resource starts.
--- Supports 'boii_rp', 'qb-core', 'es_extended', 'ox_core', and custom frameworks *(provided you fill this in of course)*.
+-- Supports 'boii_core', 'qb-core', 'es_extended', 'ox_core', and custom frameworks *(provided you fill this in of course)*.
 CreateThread(function()
     while GetResourceState(FRAMEWORK) ~= 'started' do
         Wait(500)
@@ -36,8 +41,8 @@ CreateThread(function()
 
     -- Initialize the framework based on the configuration.
     -- Extend this if-block to add support for additional frameworks.
-    if FRAMEWORK == 'boii_rp' then
-        fw = exports['boii_rp']:get_object()
+    if FRAMEWORK == 'boii_core' then
+        fw = exports.boii_core:get_object()
     elseif FRAMEWORK == 'qb-core' then
         fw = exports['qb-core']:GetCoreObject()
     elseif FRAMEWORK == 'es_extended' then
@@ -62,7 +67,7 @@ end)
 local function get_players()
 
     local players = {}
-    if FRAMEWORK == 'boii_rp' then
+    if FRAMEWORK == 'boii_core' then
         players = fw.get_players()
     elseif FRAMEWORK == 'qb-core' then
         players = fw.Functions.GetPlayers()
@@ -82,7 +87,7 @@ end
 -- @usage local player = utils.fw.get_player(player_source)
 local function get_player(_src)
     local player
-    if FRAMEWORK == 'boii_rp' then
+    if FRAMEWORK == 'boii_core' then
         player = fw.get_player(_src)
     elseif FRAMEWORK == 'qb-core' then
         player = fw.Functions.GetPlayer(_src)
@@ -105,7 +110,7 @@ local function get_player_id(_src)
     if not player then print('No player found for source: '.._src) return false end
 
     local player_id
-    if FRAMEWORK == 'boii_rp' then
+    if FRAMEWORK == 'boii_core' then
         player_id = player.passport
     elseif FRAMEWORK == 'qb-core' then
         player_id = player.PlayerData.citizenid
@@ -127,7 +132,7 @@ end
 local function get_id_params(_src)
     local player = get_player(_src)
     local query, params
-    if FRAMEWORK == 'boii_rp' then
+    if FRAMEWORK == 'boii_core' then
         query = 'unique_id = ? AND char_id = ?'
         params = { player.unique_id, player.char_id }
     elseif FRAMEWORK == 'qb-core' then
@@ -156,7 +161,7 @@ end
 local function get_insert_params(_src, data_type, data_name, data)
     local player = get_player(_src)
     local columns, values, params
-    if FRAMEWORK == 'boii_rp' then
+    if FRAMEWORK == 'boii_core' then
         columns = {'unique_id', 'char_id', data_type}
         values = '?, ?, ?'
         params = { player.unique_id, player.char_id, json.encode(data) }
@@ -190,9 +195,8 @@ local function has_item(_src, item_name, item_amount)
 
     local required_amount = item_amount or 1
     
-    if FRAMEWORK == 'boii_rp' then
-        local item = player.get_inventory_item(item_name)
-        return item ~= nil and item.quantity >= required_amount
+    if FRAMEWORK == 'boii_core' then
+        return player.has_item(item_name, required_amount)
     elseif FRAMEWORK == 'qb-core' then
         local item = player.Functions.GetItemByName(item_name)
         return item ~= nil and item.amount >= required_amount
@@ -219,8 +223,8 @@ local function get_item(_src, item_name)
     if not player then return nil end -- Player not found, return nil
 
     local item
-    if FRAMEWORK == 'boii_rp' then
-        item = player.get_inventory_item(item_name)
+    if FRAMEWORK == 'boii_core' then
+        item = player.get_item(item_name)
     elseif FRAMEWORK == 'qb-core' then
         item = player.Functions.GetItemByName(item_name)
     elseif FRAMEWORK == 'es_extended' then
@@ -235,6 +239,25 @@ local function get_item(_src, item_name)
     end
 
     return item -- Returns nil if not found or the item object if found
+end
+
+--- Gets a players inventory data
+local function get_inventory(_src, options)
+    local player = get_player(_src)
+    if not player then return false end
+
+    local inventory
+    if FRAMEWORK == 'boii_core' then
+        inventory = player.get_inventory()
+    elseif FRAMEWORK == 'qb-core' then
+        inventory = player.PlayerData.inventory
+    elseif FRAMEWORK == 'es_extended' then
+        inventory = player.getInventory()
+    elseif FRAMEWORK == 'ox_core' then
+        inventory = exports.ox_inventory:GetInventory(_src, false)
+    end
+
+    return inventory
 end
 
 --- Adjusts a player's inventory based on given options.
@@ -259,7 +282,7 @@ local function adjust_inventory(_src, options)
     local player = get_player(_src)
     if not player then return false end
     local function proceed()
-        if FRAMEWORK == 'boii_rp' then
+        if FRAMEWORK == 'boii_core' then
             player.modify_inventory(options.items, options.note, options.should_save)
         else
             for _, item in ipairs(options.items) do
@@ -318,7 +341,7 @@ local function get_balances(_src)
     if not player then return false end
 
     local balances = {}
-    if FRAMEWORK == 'boii_rp' then
+    if FRAMEWORK == 'boii_core' then
         balances = player.data.balances
     elseif FRAMEWORK == 'qb-core' then
         balances = player.PlayerData.money
@@ -346,7 +369,7 @@ local function get_balance_by_type(_src, balance_type)
     if not balances then return false end
 
     local balance
-    if FRAMEWORK == 'boii_rp' then
+    if FRAMEWORK == 'boii_core' then
         balance = balances[balance_type].amount
     elseif FRAMEWORK == 'qb-core' then
         balance = balances[balance_type]
@@ -383,7 +406,7 @@ local function adjust_balance(_src, options)
     local player = get_player(_src)
     if not player then return false end
     local function proceed()
-        if FRAMEWORK == 'boii_rp' then
+        if FRAMEWORK == 'boii_core' then
             player.modify_balances(options.operations, options.reason, options.should_save)
         else
             for _, op in ipairs(options.operations) do
@@ -443,7 +466,7 @@ local function get_identity(_src)
 
     local player_data
 
-    if FRAMEWORK == 'boii_rp' then
+    if FRAMEWORK == 'boii_core' then
         player_data = {
             first_name = player.data.identity.first_name,
             last_name = player.data.identity.last_name,
@@ -504,7 +527,7 @@ local function get_player_jobs(_src)
     local player_jobs = {}
     local player = get_player(_src)
     if player then
-        if FRAMEWORK == 'boii_rp' then
+        if FRAMEWORK == 'boii_core' then
             player_jobs = player.data.jobs
         elseif FRAMEWORK == 'qb-core' then
             player_jobs = player.PlayerData.job
@@ -516,6 +539,7 @@ local function get_player_jobs(_src)
             -- Custom framework logic here
         end
     end
+    print('player jobs: ', json.encode(player_jobs))
     return player_jobs
 end
 
@@ -525,11 +549,10 @@ end
 -- @param check_on_duty Optional boolean to also check if the player is on-duty for the job.
 -- @return Boolean indicating if the player has any of the specified jobs and meets the on-duty condition.
 local function player_has_job(_src, job_names, check_on_duty)
-    local player = get_player(_src)
     local player_jobs = get_player_jobs(_src)
     local job_found = false
     local on_duty_status = false
-    if FRAMEWORK == 'boii_rp' then
+    if FRAMEWORK == 'boii_core' then
         if player_jobs.primary and utils.tables.table_contains(job_names, player_jobs.primary.id) then
             job_found = true
             on_duty_status = player_jobs.primary.on_duty
@@ -577,7 +600,7 @@ local function get_player_job_grade(_src, job_id)
         print('No job data found for player. ' .. _src)
         return nil
     end
-    if FRAMEWORK == 'boii_rp' then
+    if FRAMEWORK == 'boii_core' then
         if player_jobs.primary and player_jobs.primary.id == job_id then
             return player_jobs.primary.grade
         end
@@ -623,6 +646,38 @@ local function count_players_by_job(job_names, check_on_duty)
     return total_with_job, total_on_duty
 end
 
+--- Returns a players job name.
+-- @param _src The player's source identifier.
+local function get_player_job_name(_src)
+    local player_jobs = get_player_jobs(_src)
+
+    if player_jobs then
+        if FRAMEWORK == 'boii_core' then
+            job_name = player_jobs.primary.id
+        elseif FRAMEWORK == 'qb-core' then
+            job_name = player_jobs.name
+        elseif FRAMEWORK == 'es_extended' or FRAMEWORK == 'ox_core' then
+            job_name = player_jobs.id
+        elseif FRAMEWORK == 'custom' then
+            -- Custom framework logic here
+        end
+    end
+    return job_name
+end
+
+--- Retrieves shared job data.
+-- @param job_id: ID for the job to retreive details for.
+local function get_shared_job_data(job_id)
+    
+    local job_details
+    if FRAMEWORK == 'boii_core' then
+        job_details = fw.shared.get_shared_data('jobs', job_id)
+    elseif FRAMEWORK == 'qb-core' then
+        job_details = fw.Shared.Jobs[job_id]
+    end
+    return job_details
+end
+
 --- Modifies a players server side statuses.
 -- @param _src The player's source identifier.
 -- @param statuses The statuses to modify.
@@ -630,7 +685,7 @@ local function adjust_statuses(_src, statuses)
     local player = get_player(_src)
     if not player then print('player not found') return end
     
-    if FRAMEWORK == 'boii_rp' or STATUSES == 'boii_statuses' then
+    if FRAMEWORK == 'boii_core' or BOII_STATUSES == 'boii_statuses' then
         local player_statuses = exports.boii_statuses:get_player(_src)
         player_statuses.modify_statuses(statuses)
         return
@@ -658,11 +713,11 @@ local function adjust_statuses(_src, statuses)
     end
 end
 
---- Updates the inventory for a player, specifically focusing on weapons and ammo.
+--- Updates the item data for a player.
 -- @param _src The player's source identifier.
--- @param item_id The ID of the item (weapon) to update.
+-- @param item_id The ID of the item to update.
 -- @param updates Table containing updates like ammo count, attachments etc.
-local function update_inventory_data(_src, item_id, updates)
+local function update_item_data(_src, item_id, updates)
     local player = get_player(_src)
     if not player then
         print('Player not found')
@@ -675,7 +730,7 @@ local function update_inventory_data(_src, item_id, updates)
         return 
     end
 
-    if FRAMEWORK == 'boii_rp' then
+    if FRAMEWORK == 'boii_core' then
         player.update_item_data(item_id, updates, true)
     end
 
@@ -737,7 +792,7 @@ end)
 local function create_skill_tables()
     utils.debug.info("Creating skills table if not exists...")
     local query
-    if FRAMEWORK == 'boii_rp' then
+    if FRAMEWORK == 'boii_core' then
         query = string.format([[
             CREATE TABLE IF NOT EXISTS `%s` (
                 `unique_id` varchar(255) NOT NULL,
@@ -786,7 +841,7 @@ create_skill_tables()
 local function create_rep_tables()
     utils.debug.info("Creating reputations table if not exists...")
     local query
-    if FRAMEWORK == 'boii_rp' then
+    if FRAMEWORK == 'boii_core' then
         query = string.format([[
             CREATE TABLE IF NOT EXISTS `%s` (
                 `unique_id` varchar(255) NOT NULL,
@@ -836,7 +891,7 @@ create_rep_tables()
 local function create_licence_tables()
     utils.debug.info("Creating licence table if not exists...")
     local query
-    if FRAMEWORK == 'boii_rp' then
+    if FRAMEWORK == 'boii_core' then
         query = string.format([[
             CREATE TABLE IF NOT EXISTS `%s` (
                 `unique_id` varchar(255) NOT NULL,
@@ -896,12 +951,15 @@ utils.fw.has_item = has_item
 utils.fw.get_balances = get_balances
 utils.fw.get_balance_by_type = get_balance_by_type
 utils.fw.adjust_balance = adjust_balance
+utils.fw.get_inventory = get_inventory
 utils.fw.adjust_inventory = adjust_inventory
 utils.fw.get_identity = get_identity
 utils.fw.get_identity_by_id = get_identity_by_id
 utils.fw.get_player_jobs = get_player_jobs
+utils.fw.get_player_job_name = get_player_job_name
+utils.fw.get_shared_job_data = get_shared_job_data
 utils.fw.player_has_job = player_has_job
 utils.fw.get_player_job_grade = get_player_job_grade
 utils.fw.count_players_by_job = count_players_by_job
 utils.fw.adjust_statuses = adjust_statuses
-utils.fw.update_inventory_data = update_inventory_data
+utils.fw.update_item_data = update_item_data
