@@ -28,7 +28,7 @@ if config.disable.frameworks then return end
 FRAMEWORK = config.framework
 
 --- Initializes the connection to the specified framework when the resource starts.
--- Supports 'boii_rp', 'qb-core', 'es_extended', 'ox_core', and custom frameworks *(provided you fill this in of course)*.
+-- Supports 'boii_core', 'qb-core', 'es_extended', 'ox_core', and custom frameworks *(provided you fill this in of course)*.
 CreateThread(function()
     while GetResourceState(FRAMEWORK) ~= 'started' do
         Wait(500)
@@ -36,8 +36,8 @@ CreateThread(function()
 
     -- Initialize the framework based on the configuration.
     -- Extend this if-block to add support for additional frameworks.
-    if FRAMEWORK == 'boii_rp' then
-        fw = exports['boii_rp']:get_object()
+    if FRAMEWORK == 'boii_core' then
+        fw = exports.boii_core:get_object()
     elseif FRAMEWORK == 'qb-core' then
         fw = exports['qb-core']:GetCoreObject()
     elseif FRAMEWORK == 'es_extended' then
@@ -64,7 +64,7 @@ end)
 -- @usage local data = utils.fw.get_data('key') -- Using a key is not required
 local function get_data(key)
     local player_data
-    if FRAMEWORK == 'boii_rp' then
+    if FRAMEWORK == 'boii_core' then
         player_data = fw.get_data(key)
     elseif FRAMEWORK == 'qb-core' then
         player_data = fw.Functions.GetPlayerData()
@@ -88,7 +88,7 @@ local function get_identity()
 
     local player_data
 
-    if FRAMEWORK == 'boii_rp' then
+    if FRAMEWORK == 'boii_core' then
         player_data = {
             first_name = player.identity.first_name,
             last_name = player.identity.last_name,
