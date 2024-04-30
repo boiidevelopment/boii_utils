@@ -2,7 +2,7 @@
 
 ## 🌍 Overview
 
-Welcome to `boii_utils`, a comprehensive utility resource tailored for game developers and server administrators.
+Welcome to `boii_utils`, a comprehensive utility resource tailored for resource developers and server administrators.
 This suite of tools is designed to simplify, streamline, and enhance the development process, offering a wide range of functionalities that span from string manipulations to table operations, and from input validations to miscellaneous utilities.
 
 The utility library is constantly growing, anything that can save development time for boii resources gets added.
