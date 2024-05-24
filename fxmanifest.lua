@@ -13,7 +13,7 @@ fx_version 'cerulean'
 games { 'gta5', 'rdr3' }
 
 name 'boii_utils'
-version '1.6.0'
+version '1.7.0'
 description 'BOII | Development - Developer Utility Library'
 author 'boiidevelopment'
 repository 'https://github.com/boiidevelopment/boii_utils'
@@ -39,7 +39,7 @@ server_scripts {
     '@oxmysql/lib/MySQL.lua',
     'server/config.lua',
     'server/version/version.lua',
-    'server/ui/*',
+    'server/ui/notifications.lua',
     'server/notifications/notifications.lua',
     'server/database/database.lua',
     'server/connections/connections.lua',
@@ -62,7 +62,8 @@ server_scripts {
 
 client_scripts {
     'client/config.lua',
-    'client/ui/*',
+    'client/ui/notifications.lua',
+    'client/ui/progressbar.lua',
     'client/notifications/notifications.lua',
     'client/requests/requests.lua',
     'client/player/player.lua',
