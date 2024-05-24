@@ -36,7 +36,11 @@ end
     local group_id = utils.groups.create({
         name = 'racing-1',
         type = 'racing',
-        members = {1, 2, 3},
+        image = 'https://i.ibb.co/gj2bYmD/logo.png',
+        leader = { id = 1, username = TestPlayer, profile_picture = ''}
+        members = {
+            { id = 4, username = 'Player1', profile_picture = 'assets/images/default_user.jpg' }
+        },
         max_members = 5  -- Optional. If not provided, config value is used
     })
     if not group_id then
@@ -48,6 +52,8 @@ local function create(params)
     local max_members = params.max_members or config.groups.max_members
     player_groups[params.name] = {
         type = params.type,
+        image = params.image or 'https://i.ibb.co/gj2bYmD/logo.png',
+        leader = params.leader,
         members = params.members,
         max_members = max_members
     }
@@ -67,8 +73,55 @@ end
     utils.debug.info(tostring(grouped))  --> true or false
 ]]
 local function in_group(params)
-    for _, player in ipairs(player_groups[params.name].members) do
-        if player.id == params.player_id then
+    local group = player_groups[params.name]
+    if not group then return false end
+    for _, member in ipairs(group.members) do
+        if member.id == params.player_id then
+            return true
+        end
+    end
+    if group.leader and group.leader.id == params.player_id then
+        return true
+    end
+    return false
+end
+
+--- Function to check if a player is a leader of a specified group.
+-- @param params Table containing group name and player_id.
+-- @return True if the player is the leader of the group, false otherwise.
+-- @usage
+--[[ 
+    local is_leader = utils.groups.is_leader({
+        name = 'racing-1',
+        player_id = 2
+    })
+    utils.debug.info(tostring(is_leader))  --> true or false
+]]
+local function is_leader(params)
+    local group = player_groups[params.name]
+    if not group then return false end
+    if group.leader and group.leader.id == params.player_id then
+        return true
+    end
+    return false
+end
+
+--- Function to check if a player is a member of a specified group.
+-- @param params Table containing group name and player_id.
+-- @return True if the player is a member of the group, false otherwise.
+-- @usage
+--[[ 
+    local is_member = utils.groups.is_member({
+        name = 'racing-1',
+        player_id = 2
+    })
+    utils.debug.info(tostring(is_member))  --> true or false
+]]
+local function is_member(params)
+    local group = player_groups[params.name]
+    if not group then return false end
+    for _, member in ipairs(group.members) do
+        if member.id == params.player_id then
             return true
         end
     end
@@ -138,6 +191,26 @@ local function get_players_of_type(type)
     return players
 end
 
+--- Function to get all groups of a specific type.
+-- @param type The type of group to retrieve.
+-- @return A table containing all groups of the specified type.
+-- @usage
+--[[ 
+    local type_groups = utils.groups.get_groups_of_type('racing')
+    for name, group_data in pairs(type_groups) do
+        print(name, group_data.type)
+    end
+]]
+local function get_groups_of_type(type)
+    local groups_of_type = {}
+    for name, group_data in pairs(player_groups) do
+        if group_data.type == type then
+            groups_of_type[name] = group_data
+        end
+    end
+    return groups_of_type
+end
+
 --- Function to add a player to a specified group.
 -- @param params Table containing group name and player_id to add.
 -- @return True if the player was successfully added, false otherwise.
@@ -149,22 +222,13 @@ end
     })
 ]]
 local function add(params)
-    local player_id = params.player_id
+    local player_id = params.player_details.player_id
     local group_name = params.name
     if #player_groups[group_name].members >= player_groups[group_name].max_members then
         utils.debug.info("Group has reached its max members limit.")
         return false
     end
-    local identity = utils.fw.get_identity(player_id)
-    if not identity then
-        utils.debug.info("Could not fetch player identity for " .. player_id)
-        return false
-    end
-    local player_detail = {
-        id = player_id,
-        first_name = identity.first_name,
-        last_name = identity.last_name
-    }
+    local player_detail = params.player_details
     player_groups[group_name].members[player_groups[group_name].members + 1] = player_detail
     update_client()
     return true
@@ -186,6 +250,21 @@ local function remove(params)
             update_client()
             break
         end
+    end
+end
+
+--- Function to close a group and remove all its members.
+-- @param group_name The name of the group to close.
+local function close_group(group_name)
+    if player_groups[group_name] then
+        for _, member in ipairs(player_groups[group_name].members) do
+            TriggerClientEvent('chat:addMessage', member.id, {
+                template = "<div class='msg chat-message warning'><span><i class='fa-solid fa-triangle-exclamation'></i>[WARNING] The group '" .. group_name .. "' has been disbanded.</span></div>",
+                args = {}
+            })
+        end
+        player_groups[group_name] = nil
+        update_client()
     end
 end
 
@@ -224,159 +303,13 @@ utils.groups.create = create
 utils.groups.add = add
 utils.groups.remove = remove
 utils.groups.in_group = in_group
+utils.groups.is_member = is_member
+utils.groups.is_leader = is_leader
 utils.groups.get_all_groups = get_all_groups
 utils.groups.get_group = get_group
 utils.groups.get_player_groups = get_player_groups
 utils.groups.get_players_of_type = get_players_of_type
 utils.groups.group_exists = group_exists
 utils.groups.get_all_group_names = get_all_group_names
-
---- @section Testing
-
--- Command to create a group
-RegisterCommand("creategroup", function(source, args, rawCommand)
-    local group_name = args[1]
-    local group_type = args[2]
-
-    if not group_name or not group_type then
-        TriggerClientEvent('chat:addMessage', source, {
-            template = "<div class='msg chat-message warning'><span><i class='fa-solid fa-triangle-exclamation'></i>[WARNING] Error: You must specify a group name and type.</span></div>",
-            args = {}
-        })
-        return
-    end
-
-    -- Fetch the identity of the creator
-    local identity = utils.fw.get_identity(source)
-    if not identity then
-        TriggerClientEvent('chat:addMessage', source, {
-            template = "<div class='msg chat-message warning'><span><i class='fa-solid fa-triangle-exclamation'></i>[WARNING] Error: Could not fetch player identity.</span></div>",
-            args = {}
-        })
-        return
-    end
-
-    -- Adjusted to include creator as a detailed member
-    local creator_detail = {
-        id = source, -- or use get_player_id(source) if you need a specific ID format
-        first_name = identity.first_name,
-        last_name = identity.last_name
-    }
-
-    local group_id = utils.groups.create({
-        name = group_name,
-        type = group_type,
-        members = {creator_detail}, -- Pass as a table containing the creator detail
-        max_members = 5 -- Or another number / leave out for default
-    })
-
-    if group_id then
-        TriggerClientEvent('chat:addMessage', source, {
-            template = "<div class='msg chat-message success'><span><i class='fa-solid fa-check'></i>[SUCCESS] Group " .. group_name .. " of type " .. group_type .. " created successfully.</span></div>",
-            args = {}
-        })
-    else
-        TriggerClientEvent('chat:addMessage', source, {
-            template = "<div class='msg chat-message warning'><span><i class='fa-solid fa-triangle-exclamation'></i>[WARNING] Error: Failed to create group. It may already exist.</span></div>",
-            args = {}
-        })
-    end
-end, false)
-
-
--- Command to add oneself to a group
-RegisterCommand("joingroup", function(source, args, rawCommand)
-    local group_name = args[1]
-    if not group_name then
-        TriggerClientEvent('chat:addMessage', source, {
-            template = [[
-                <div class="msg chat-message warning">
-                    <span><i class="fa-solid fa-triangle-exclamation"></i>[WARNING] Error: Please specify a group name.</span>
-                </div>
-            ]],
-            args = { }
-        })
-        return
-    end
-    local success = utils.groups.add({
-        name = group_name,
-        player_id = source
-    })
-    if success then
-        TriggerClientEvent('chat:addMessage', source, {
-            template = [[
-                <div class="msg chat-message success">
-                    <span><i class="fa-solid fa-check"></i>[SUCCESS] You joined <group_name>{0}</group_name>.</span>
-                </div>
-            ]],
-            args = { group_name }
-        })
-    else
-        TriggerClientEvent('chat:addMessage', source, {
-            template = [[
-                <div class="msg chat-message warning">
-                    <span><i class="fa-solid fa-triangle-exclamation"></i>[WARNING] Error: Failed to join the group. It might be full or you've reached the group limit.</span>
-                </div>
-            ]],
-            args = { }
-        })
-    end
-end, false)
-
--- Command to remove oneself from a group
-RegisterCommand("leavegroup", function(source, args, rawCommand)
-    local group_name = args[1]
-    if not group_name then
-        TriggerClientEvent('chat:addMessage', source, {
-            template = [[
-                <div class="msg chat-message warning">
-                    <span><i class="fa-solid fa-triangle-exclamation"></i>[WARNING] Error: Please specify a group name.</span>
-                </div>
-            ]],
-            args = { }
-        })
-        return
-    end
-
-    utils.groups.remove({
-        name = group_name,
-        player_id = source
-    })
-    TriggerClientEvent('chat:addMessage', source, {
-        template = [[
-            <div class="msg chat-message success">
-                <span><i class="fa-solid fa-check"></i>[SUCCESS] You left <group_name>{0}</group_name>.</span>
-            </div>
-        ]],
-        args = { group_name }
-    })
-end, false)
-
--- Command to print out all groups
-RegisterCommand("allgroups", function(source, _args, _raw_command)
-    local all_groups = utils.groups.get_all_groups()
-    TriggerClientEvent('chat:addMessage', source, {
-        template = [[
-            <div class="msg chat-message default">
-                <span><i class="fa-solid fa-list"></i>[SYSTEM] All existing groups:</span>
-            </div>
-        ]],
-        args = {}
-    })
-    for group_name, group_data in pairs(all_groups) do
-        local member_names = {}
-        for _, member in ipairs(group_data.members) do
-            member_names[#member_names + 1] = member.first_name .. " " .. member.last_name
-        end
-        local member_names_str = table.concat(member_names, ", ")
-        local member_count = tostring(#group_data.members)
-        TriggerClientEvent('chat:addMessage', source, {
-            template = [[
-                <div class="msg chat-message default">
-                    <span><i class="fa-solid fa-users"></i>[GROUP INFO] <strong>{0}</strong>: Type: {1}, Members ({2}): {3}</span>
-                </div>
-            ]],
-            args = { group_name, group_data.type, member_count, member_names_str }
-        })
-    end
-end, false)
+utils.groups.get_groups_of_type = get_groups_of_type
+utils.groups.close_group = close_group
