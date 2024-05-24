@@ -94,7 +94,7 @@ end
     utils.blips.create_blips(blip_config)
 ]]
 local function create_blips(blip_config)
-    for _, blip_data in ipairs(blip_config) do
+    for _, blip_data in pairs(blip_config) do
         create_blip(blip_data)
     end
 end
@@ -122,21 +122,18 @@ end
 -- @param categories table: A list of categories to remove blips from.
 -- @usage utils.blips.remove_blips_by_categories({'shop', 'house'}) -- Remove blips in the 'shop' and 'house' categories
 local function remove_blips_by_categories(categories)
-    print("Starting blip removal for categories:", table.concat(categories, ", "))
     local initialCount = #created_blips
     for i = #created_blips, 1, -1 do
         local blip_data = created_blips[i]
-        for _, category in ipairs(categories) do
+        for _, category in pairs(categories) do
             if blip_data.category == category then
                 remove_blip(blip_data.blip)
                 table.remove(created_blips, i)
-                print("Removed blip:", blip_data.label, "Category:", category)
                 break
             end
         end
     end
-
-    print(string.format("Removed %d blips. Remaining blips: %d", initialCount - #created_blips, #created_blips))
+    utils.debug.log(string.format("Removed %d blips. Remaining blips: %d", initialCount - #created_blips, #created_blips))
 end
 
 --- Create a blip with customizable alpha and duration.
@@ -148,17 +145,29 @@ end
 -- @param label string: The label for the blip.
 -- @param alpha number: The alpha level for the blip.
 -- @param duration number: The duration for the blip to stay before fading.
--- @usage utils.blips.create_blip_alpha(vector3(100.0, 200.0, 30.0), 161, 1, 1.5, 'Example Blip', 250, 5)
-local function create_blip_alpha(coords, sprite, colour, scale, label, alpha, duration)
-    local blip = AddBlipForCoord(coords)
-    SetBlipSprite(blip, sprite)
-    SetBlipColour(blip, colour)
-    SetBlipScale(blip, scale)
+-- @usage
+--[[
+    utils.blips.create_blip_alpha({
+        coords = vector3(100.0, 200.0, 30.0),
+        sprite = 161,
+        colour = 1, 
+        scale = 1.5, 
+        label = 'Example Blip',
+        alpha = 250,
+        duration = 1000
+    })
+]]
+local function create_blip_alpha(options)
+    local blip = AddBlipForCoord(options.coords)
+    SetBlipSprite(blip, options.sprite)
+    SetBlipColour(blip, options.colour)
+    SetBlipScale(blip, options.scale)
     SetBlipAsShortRange(blip, true)
     BeginTextCommandSetBlipName("STRING")
-    AddTextComponentString(label)
+    AddTextComponentString(options.label)
     EndTextCommandSetBlipName(blip)
-    local step = alpha / (duration * 4)
+    local alpha = options.alpha
+    local step = alpha / (options.duration * 4)
     while alpha > 0 do
         Wait(120 * 4)
         alpha = alpha - step
@@ -227,7 +236,7 @@ end
 -- @function update_blip_scale
 -- @param blip number: The blip whose scale should be updated.
 -- @param new_scale number: The new scale for the blip.
--- @usage utils.blips.update_blip_scale(myBlip, 2.0)
+-- @usage utils.blips.update_blip_scale(blip, 2.0)
 local function update_blip_scale(blip, new_scale)
     if DoesBlipExist(blip) then
         SetBlipScale(blip, new_scale)
