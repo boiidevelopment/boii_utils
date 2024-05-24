@@ -112,7 +112,7 @@ local function get_player_id(_src)
     local player_id
     if FRAMEWORK == 'boii_core' then
         player_id = player.passport
-    elseif FRAMEWORK == 'qb-core' then
+    elseif FRAMEWORK == 'qb-core' then 
         player_id = player.PlayerData.citizenid
     elseif FRAMEWORK == 'es_extended' then
         player_id = player.identifier
@@ -370,7 +370,12 @@ local function get_balance_by_type(_src, balance_type)
 
     local balance
     if FRAMEWORK == 'boii_core' then
-        balance = balances[balance_type].amount
+        if balance_type == 'cash' then
+            local cash_item = get_item(_src, 'cash')
+            balance = cash_item.quantity
+        else
+            balance = balances[balance_type].amount
+        end
     elseif FRAMEWORK == 'qb-core' then
         balance = balances[balance_type]
     elseif FRAMEWORK == 'es_extended' then
@@ -539,7 +544,6 @@ local function get_player_jobs(_src)
             -- Custom framework logic here
         end
     end
-    print('player jobs: ', json.encode(player_jobs))
     return player_jobs
 end
 
