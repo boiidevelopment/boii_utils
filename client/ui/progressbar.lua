@@ -70,7 +70,12 @@ local function handle_event(outcome)
         TriggerEvent(outcome.event.event, outcome.event.params)
     end
     if outcome.notify then
-        notify(outcome.notify)
+        utils.ui.notify({
+            type = outcome.notify.type,
+            header = outcome.notify.header,
+            message = outcome.notify.message,
+            duration = outcome.notify.duration
+        })
     end
     progress_active = false
 end
@@ -99,52 +104,3 @@ end
 --- @section Assign local functions
 
 utils.ui.progressbar = progressbar
-
---- Creates a test progressbar using the unified progress function.
-RegisterCommand('utils:test_prog', function()
-    local data = {
-        progressbar = {
-            header = 'Trimming Buds..',
-            icon = 'fa-solid fa-cannabis',
-            duration = 15000,
-            disable_controls = { -- COntrol disables added in for ease of use with bridging qb-progressbar along with providing that extra familiarity.
-                mouse = false, -- Disables mouse controls
-                movement = false, -- Movement controls
-                car_movement = false, -- In vehicle movement controls
-                combat = false -- Disables firing
-            },
-            animation = {
-                dict = 'amb@prop_human_parking_meter@female@base',
-                anim = 'base_female',
-                flags = 49
-            },
-            props = {
-                {
-                    model = 'h4_prop_h4_weed_bud_02b',
-                    bone = 28422,
-                    coords = vector3(0.09, -0.075, 0.0),
-                    rotation = vector3(-90.0, 0.0, 0.0)
-                }
-            },
-            on_success = {
-                notify = {
-                    type = 'success',
-                    header = 'TRIMMING',
-                    message = 'You have successfully trimmed the buds.',
-                    duration = 3000
-                }
-            },
-            on_cancel = {
-                notify = {
-                    type = 'error',
-                    header = 'TRIMMING',
-                    message = 'Trimming cancelled.',
-                    duration = 3000
-                }
-            }
-        }
-    }
-
-    utils.ui.progressbar(data)
-end)
-
