@@ -1,3 +1,14 @@
+--[[
+     ____   ____ _____ _____   _   _____  ________      ________ _      ____  _____  __  __ ______ _   _ _______ 
+    |  _ \ / __ \_   _|_   _| | | |  __ \|  ____\ \    / /  ____| |    / __ \|  __ \|  \/  |  ____| \ | |__   __|
+    | |_) | |  | || |   | |   | | | |  | | |__   \ \  / /| |__  | |   | |  | | |__) | \  / | |__  |  \| |  | |   
+    |  _ <| |  | || |   | |   | | | |  | |  __|   \ \/ / |  __| | |   | |  | |  ___/| |\/| |  __| | . ` |  | |   
+    | |_) | |__| || |_ _| |_  | | | |__| | |____   \  /  | |____| |___| |__| | |    | |  | | |____| |\  |  | |   
+    |____/ \____/_____|_____| | | |_____/|______|   \/   |______|______\____/|_|    |_|  |_|______|_| \_|  |_|   
+                              | |                                                                                
+                              |_|             DEVELOPER UTILS
+]]
+
 --- @section Constants
 
 local NOTIFICATIONS = config.ui.notify
@@ -37,6 +48,9 @@ local notifications = {
             return { opts.message, opts.type, opts.duration }
         end,
         unpack_args = true
+    },
+    okokNotify = {
+        
     }
 }
 
@@ -51,7 +65,7 @@ local function notify(options)
     local notif = notifications[NOTIFICATIONS] or notifications.boii_ui
     options.type = notif.type_mapping[options.type] or options.type
     local args = notif.prepare_args(options)
-    local notify_params = unpack_args and table.unpack(args) or args
+    local notify_params = notif.unpack_args and table.unpack(args) or args
     TriggerEvent(notif.event_name, notify_params)
 end
 
