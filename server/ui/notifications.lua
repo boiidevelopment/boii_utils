@@ -40,20 +40,18 @@ local notifications = {
     }
 }
 
---- @section Local functions
-
 --- Triggers notifications depending on chosen setting.
--- @param _src: Souce player.
+-- @param _src: Source player.
 -- @param options: Table of notification options.
 local function notify(_src, options)
     if not options or not options.type or not options.message then
-        print("Invalid notification data provided")
+        print('Invalid notification data provided')
         return
     end
     local notif = notifications[NOTIFICATIONS] or notifications.boii_ui
     options.type = notif.type_mapping[options.type] or options.type
     local args = notif.prepare_args(options)
-    local notify_params = unpack_args and table.unpack(args) or args
+    local notify_params = notif.unpack_args and table.unpack(args) or args
     TriggerClientEvent(notif.event_name, _src, notify_params)
 end
 
