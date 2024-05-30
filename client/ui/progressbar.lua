@@ -1,6 +1,16 @@
+--[[
+     ____   ____ _____ _____   _   _____  ________      ________ _      ____  _____  __  __ ______ _   _ _______ 
+    |  _ \ / __ \_   _|_   _| | | |  __ \|  ____\ \    / /  ____| |    / __ \|  __ \|  \/  |  ____| \ | |__   __|
+    | |_) | |  | || |   | |   | | | |  | | |__   \ \  / /| |__  | |   | |  | | |__) | \  / | |__  |  \| |  | |   
+    |  _ <| |  | || |   | |   | | | |  | |  __|   \ \/ / |  __| | |   | |  | |  ___/| |\/| |  __| | . ` |  | |   
+    | |_) | |__| || |_ _| |_  | | | |__| | |____   \  /  | |____| |___| |__| | |    | |  | | |____| |\  |  | |   
+    |____/ \____/_____|_____| | | |_____/|______|   \/   |______|______\____/|_|    |_|  |_|______|_| \_|  |_|   
+                              | |                                                                                
+                              |_|             DEVELOPER UTILS
+]]
+
 local PROGRESSBAR = config.ui.progressbar
 
---- Progressbars
 local progressbars = {
     boii_ui = {
         show_progress = function(data, callback)
@@ -12,51 +22,6 @@ local progressbars = {
                 animation = data.animation,
                 props = data.props
             }, callback)
-        end
-    },
-    ['qb-core'] = {
-        show_progress = function(data, callback)
-            local props = data.props or {}
-            local prop = props[1] or {}
-            local prop_2 = props[2] or {}
-            local animation = data.animation or {}
-            local disabled_controls = data.disabled_controls or {}
-            exports['progressbar']:Progress({
-                name = data.header .. GetGameTimer(),
-                duration = data.duration or 5000,
-                label = data.header or "Processing",
-                useWhileDead = false,
-                canCancel = true,
-                controlDisables = {
-                    disableMovement = disabled_controls.movement or false,
-                    disableCarMovement = disabled_controls.car_movement or false,
-                    disableMouse = disabled_controls.mouse or false,
-                    disableCombat = disabled_controls.combat or true,
-                },
-                animation = {
-                    animDict = animation.dict or "",
-                    anim = animation.anim or "",
-                    flags = animation.flags or 49,
-                },
-                prop = {
-                    model = prop.model or '',
-                    bone = prop.bone or 0,
-                    coords = prop.coords or vector3(0,0,0),
-                    rotation = prop.rotation or vector3(0,0,0),
-                },
-                prop_2 = {
-                    model = prop_2.model or '',
-                    bone = prop_2.bone or 0,
-                    coords = prop_2.coords or vector3(0,0,0),
-                    rotation = prop_2.rotation or vector3(0,0,0),
-                }
-            }, function(cancelled)
-                if not cancelled then
-                    callback(true)  -- success
-                else
-                    callback(false)  -- cancelled
-                end
-            end)
         end
     }
 }
@@ -83,7 +48,10 @@ end
 --- Runs a progressbar depending on config settings.
 -- @param data: Data table for the bar.
 local function progressbar(data)
-    if progress_active or not data then return end
+    if progress_active or not data then 
+        print("Progress bar already active or data is missing")
+        return 
+    end
     progress_active = true
 
     local system = progressbars[PROGRESSBAR]
@@ -93,10 +61,11 @@ local function progressbar(data)
                 handle_event(data.on_success)
             elseif not success and data.on_cancel then
                 handle_event(data.on_cancel)
+            else
+                progress_active = false
             end
         end)
     else
-        print("Progress bar system not configured or not found.")
         progress_active = false
     end
 end
