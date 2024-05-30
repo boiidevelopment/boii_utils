@@ -13,13 +13,14 @@ fx_version 'cerulean'
 games { 'gta5', 'rdr3' }
 
 name 'boii_utils'
-version '1.7.0'
+version '1.7.1'
 description 'BOII | Development - Developer Utility Library'
 author 'boiidevelopment'
 repository 'https://github.com/boiidevelopment/boii_utils'
 lua54 'yes'
 
 shared_scripts {
+    --'@ox_lib/init.lua', -- Uncomment if using ox lib
     'shared/main.lua',
     'shared/debug/debug.lua',
     'shared/general/general.lua',
@@ -62,6 +63,7 @@ server_scripts {
 
 client_scripts {
     'client/config.lua',
+    'client/frameworks/frameworks.lua',
     'client/ui/notifications.lua',
     'client/ui/progressbar.lua',
     'client/notifications/notifications.lua',
@@ -76,7 +78,6 @@ client_scripts {
     'client/developer/developer.lua',
     'client/groups/groups.lua',
     'client/callbacks/callbacks.lua',
-    'client/frameworks/frameworks.lua',
     'client/cooldowns/cooldowns.lua',
     'client/conversions/conversions.lua',
     'client/skills/skills.lua',
