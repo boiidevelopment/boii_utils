@@ -278,6 +278,8 @@ utils.fw.adjust_inventory({
     should_save = true
 })
 ]]
+local INVENTORY = 'ox_inventory'
+
 local function adjust_inventory(_src, options)
     local player = get_player(_src)
     if not player then return false end
@@ -287,6 +289,10 @@ local function adjust_inventory(_src, options)
         else
             for _, item in ipairs(options.items) do
                 if item.action == 'add' then
+                    if INVENTORY == 'ox_inventory' then
+                        exports.ox_inventory:AddItem(_src, item.item_id, item.quantity, item.data)
+                        break
+                    end
                     if FRAMEWORK == 'qb-core' then
                         player.Functions.AddItem(item.item_id, item.quantity, nil, item.data)
                     elseif FRAMEWORK == 'es_extended' then
@@ -297,6 +303,10 @@ local function adjust_inventory(_src, options)
                         -- Custom logic here
                     end
                 elseif item.action == 'remove' then
+                    if INVENTORY == 'ox_inventory' then
+                        exports.ox_inventory:RemoveItem(_src, item.item_id, item.quantity, item.data)
+                        break
+                    end
                     if FRAMEWORK == 'qb-core' then
                         player.Functions.RemoveItem(item.item_id, item.quantity)
                     elseif FRAMEWORK == 'es_extended' then
@@ -372,16 +382,17 @@ local function get_balance_by_type(_src, balance_type)
     if FRAMEWORK == 'boii_core' then
         if balance_type == 'cash' then
             local cash_item = get_item(_src, 'cash')
-            balance = cash_item.quantity
+            local cash_balance = cash_item and cash_item.quantity or 0
+            balance = cash_balance
         else
-            balance = balances[balance_type].amount
+            balance = balances[balance_type] and balances[balance_type].amount or 0
         end
     elseif FRAMEWORK == 'qb-core' then
-        balance = balances[balance_type]
+        balance = balances[balance_type] or 0
     elseif FRAMEWORK == 'es_extended' then
-        balance = balances[balance_type]
+        balance = balances[balance_type] or 0
     elseif FRAMEWORK == 'ox_core' then  
-        balance = balances
+        balance = balances or 0
     elseif FRAMEWORK == 'custom' then
         -- Custom framework logic
     end
@@ -682,33 +693,61 @@ local function get_shared_job_data(job_id)
     return job_details
 end
 
---- Modifies a players server side statuses.
+--- Modifies a player's server-side statuses.
 -- @param _src The player's source identifier.
 -- @param statuses The statuses to modify.
 local function adjust_statuses(_src, statuses)
     local player = get_player(_src)
-    if not player then print('player not found') return end
-    
-    if FRAMEWORK == 'boii_core' or BOII_STATUSES == 'boii_statuses' then
+    if not player then 
+        print('Player not found') 
+        return 
+    end
+
+    if FRAMEWORK == 'boii_core' or BOII_STATUSES then
         local player_statuses = exports.boii_statuses:get_player(_src)
         player_statuses.modify_statuses(statuses)
         return
     end
-    
+
     if FRAMEWORK == 'qb-core' then
         for key, mod in pairs(statuses) do
             if player.PlayerData.metadata[key] then
                 local current = player.PlayerData.metadata[key]
                 local new_value = math.min(100, math.max(0, current + (mod.add or 0) - (mod.remove or 0)))
                 player.Functions.SetMetaData(key, new_value)
+                print(string.format("QB-Core: Updated status '%s' for player %d from %.2f to %.2f", key, _src, current, new_value))
             end
         end
     elseif FRAMEWORK == 'es_extended' then
+        local esx_max_value = 1000000
+        local scale = esx_max_value / 100
         for key, mod in pairs(statuses) do
-            TriggerEvent('esx_status:getStatus', _src, key, function(status)
-                local new_val = math.max(0, status.getPercent() + (mod.add or 0) - (mod.remove or 0))
-                status.setPercent(new_val)
-            end)
+            local status_found = false
+            if player.metadata[key] then
+                local current = player.metadata[key]
+                local new_value = math.min(100, math.max(0, current + (mod.add or 0) - (mod.remove or 0)))
+                player.set(key, new_value)
+                status_found = true
+            end
+            if not status_found then
+                for _, stat in pairs(player.variables.status) do
+                    if stat.name == key then
+                        local current = stat.val / scale
+                        local new_value = math.min(100, math.max(0, current + (mod.add or 0) - (mod.remove or 0)))
+                        local scaled_value = new_value * scale
+                        stat.val = scaled_value
+                        player.set('status', player.variables.status)
+                        TriggerClientEvent('esx_status:set', _src, key, scaled_value)
+                        TriggerEvent('esx_status:update', _src, key, scaled_value)
+                        TriggerEvent('esx_status:updateClient', _src)
+                        status_found = true
+                        break
+                    end
+                end
+            end
+            if not status_found then
+                print('Status not found for key: ' .. key)
+            end
         end
     elseif FRAMEWORK == 'ox_core' then
         -- @todo Add ox core status logic
@@ -727,7 +766,6 @@ local function update_item_data(_src, item_id, updates)
         print('Player not found')
         return
     end
-
     local item = get_item(_src, item_id)
     if not item then 
         print('Item not found:', item_id)
