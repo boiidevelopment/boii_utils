@@ -136,15 +136,17 @@ local function remove_blips_by_categories(categories)
     utils.debug.log(string.format("Removed %d blips. Remaining blips: %d", initialCount - #created_blips, #created_blips))
 end
 
---- Create a blip with customizable alpha and duration.
+--- Create a blip with customizable alpha and duration, and optional color palette.
 -- @function create_blip_alpha
--- @param coords vector3: The coordinates where the blip should be created.
--- @param sprite number: The sprite ID for the blip.
--- @param colour number: The color ID for the blip.
--- @param scale number: The scale of the blip.
--- @param label string: The label for the blip.
--- @param alpha number: The alpha level for the blip.
--- @param duration number: The duration for the blip to stay before fading.
+-- @param options table: A table containing the following keys:
+-- @field coords vector3: The coordinates where the blip should be created.
+-- @field sprite number: The sprite ID for the blip.
+-- @field colour number: The initial color ID for the blip.
+-- @field scale number: The scale of the blip.
+-- @field label string: The label for the blip.
+-- @field alpha number: The initial alpha level for the blip.
+-- @field duration number: The duration in seconds for the blip to stay before fading.
+-- @field colour_palette table: Optional table of color IDs to cycle through.
 -- @usage
 --[[
     utils.blips.create_blip_alpha({
@@ -154,7 +156,8 @@ end
         scale = 1.5, 
         label = 'Example Blip',
         alpha = 250,
-        duration = 1000
+        duration = 10,
+        colour_palette = {1, 3}
     })
 ]]
 local function create_blip_alpha(options)
@@ -167,16 +170,33 @@ local function create_blip_alpha(options)
     AddTextComponentString(options.label)
     EndTextCommandSetBlipName(blip)
     local alpha = options.alpha
-    local step = alpha / (options.duration * 4)
-    while alpha > 0 do
-        Wait(120 * 4)
-        alpha = alpha - step
-        SetBlipAlpha(blip, alpha)
-        if alpha <= 0 then
-            RemoveBlip(blip)
-            return
+    local duration = options.duration * 1000
+    local start_time = GetGameTimer()
+    local step_time = 100
+    local steps = duration / step_time
+    local alpha_decrement = alpha / steps
+    local colour_palette = options.colour_palette or {options.colour}
+    local current_color_index = 1
+    CreateThread(function()
+        while alpha > 0 do
+            alpha = alpha - alpha_decrement
+            if alpha <= 0 then
+                RemoveBlip(blip)
+                return
+            end
+            SetBlipAlpha(blip, math.floor(alpha))
+            Wait(step_time)
         end
-    end
+    end)
+    CreateThread(function()
+        while alpha > 0 do
+            if #colour_palette > 1 then
+                current_color_index = current_color_index % #colour_palette + 1
+                SetBlipColour(blip, colour_palette[current_color_index])
+            end
+            Wait(750)
+        end
+    end)
 end
 
 --- Update the label of a blip.
