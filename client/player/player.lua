@@ -126,6 +126,47 @@ local function get_distance_to_entity(player, entity)
     return #(player_coords - entity_coords)
 end
 
+--- Runs animation on the player with params.
+-- @function play_animation
+-- @param player number: The player entity.
+-- @param options table: Table of options to run when playing.
+-- @param callback function: Callback function to run when animation has finished.
+-- @usage 
+--[[
+    local player_ped = PlayerPedId()
+    utils.player.play_animation(player_ped, {
+        dict = 'missheistdockssetup1clipboard@base',
+        anim = 'base',
+        flags = 49,
+        duration = 5000,
+        freeze = true
+    }, function()
+        print('animation finished')
+    end)
+]]
+local function play_animation(player, options, callback)
+    if not player then
+        print('player ped is missing')
+    end
+    if not options or not options.dict or not options.anim then 
+        print('Options or animation dictionary/animation name is missing')
+        return
+    end
+    utils.requests.anim(options.dict)
+    if options.freeze then
+        FreezeEntityPosition(player, true)
+    end
+    TaskPlayAnim(player, options.dict, options.anim, options.blend_in or 8.0,   options.blend_out or -8.0, options.duration or -1, options.flag or 49, options.playback or 0, options.lock_x or 0, options.lock_y or 0, options.lock_z or 0)
+    Wait(options.duration or 2000)
+    ClearPedTasks(player)
+    if options.freeze then
+        FreezeEntityPosition(player, false)
+    end
+    if callback then
+        callback()
+    end
+end
+
 --- @section Assign local functions
 
 utils.player.get_cardinal_direction = get_cardinal_direction
@@ -135,3 +176,4 @@ utils.player.get_player_details = get_player_details
 utils.player.get_target_entity = get_target_entity
 utils.player.get_current_weapon = get_current_weapon
 utils.player.get_distance_to_entity = get_distance_to_entity
+utils.player.play_animation = play_animation
