@@ -254,6 +254,25 @@ local function get_entities_in_front_of_player(fov, distance)
     return nil
 end
 
+--- Get the target ped or nearest
+-- @function get_target_ped
+-- @param player_ped: PlayerPedId() for the player.
+-- @param fov number: Field of view in degrees.
+-- @param distance number: Maximum distance to search within.
+-- @return entity: The entity in front of the player within the specified FOV and distance, or the closest entity.
+-- @usage local target_ped = utils.entities.get_target_ped(PlayerPedId(), 45.0, 10.0)
+local function get_target_ped(player_ped, fov, distance)
+    local entity = get_entities_in_front_of_player(fov, distance)
+    if entity and IsEntityAPed(entity) and not IsPedAPlayer(entity) then
+        return entity, GetEntityCoords(entity)
+    end
+    
+    local player_coords = GetEntityCoords(player_ped)
+    local target_ped, target_coords = get_closest_ped(player_coords, 5.0)
+    return target_ped, target_coords
+end
+
+
 --- @section Assign local functions
 
 utils.entities.get_nearby_objects = get_nearby_objects
@@ -264,3 +283,4 @@ utils.entities.get_closest_ped = get_closest_ped
 utils.entities.get_closest_player = get_closest_player
 utils.entities.get_closest_vehicle = get_closest_vehicle
 utils.entities.get_entities_in_front_of_player = get_entities_in_front_of_player
+utils.entities.get_target_ped = get_target_ped
