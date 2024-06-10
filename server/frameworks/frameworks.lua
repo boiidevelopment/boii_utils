@@ -10,7 +10,7 @@
 ]]
 
 --- Framework bridge.
--- @script client/framework.lua
+-- @script server/framework.lua
 -- @todo Add support for other frameworks { nd_core, qbox, ?? }
 
 --- @section Initialization
@@ -232,7 +232,7 @@ local function get_item(_src, item_name)
     elseif FRAMEWORK == 'ox_core' then
         local items = exports.ox_inventory:Search(_src, 'items', item_name)
         if items and #items > 0 then
-            item = items[1] -- Assuming the first match is what we want
+            item = items[1]
         end
     elseif FRAMEWORK == 'custom' then
         -- Custom framework logic to retrieve item
@@ -242,7 +242,7 @@ local function get_item(_src, item_name)
 end
 
 --- Gets a players inventory data
-local function get_inventory(_src, options)
+local function get_inventory(_src)
     local player = get_player(_src)
     if not player then return false end
 
@@ -278,8 +278,6 @@ utils.fw.adjust_inventory({
     should_save = true
 })
 ]]
-local INVENTORY = 'ox_inventory'
-
 local function adjust_inventory(_src, options)
     local player = get_player(_src)
     if not player then return false end
@@ -289,10 +287,6 @@ local function adjust_inventory(_src, options)
         else
             for _, item in ipairs(options.items) do
                 if item.action == 'add' then
-                    if INVENTORY == 'ox_inventory' then
-                        exports.ox_inventory:AddItem(_src, item.item_id, item.quantity, item.data)
-                        break
-                    end
                     if FRAMEWORK == 'qb-core' then
                         player.Functions.AddItem(item.item_id, item.quantity, nil, item.data)
                     elseif FRAMEWORK == 'es_extended' then
@@ -303,10 +297,6 @@ local function adjust_inventory(_src, options)
                         -- Custom logic here
                     end
                 elseif item.action == 'remove' then
-                    if INVENTORY == 'ox_inventory' then
-                        exports.ox_inventory:RemoveItem(_src, item.item_id, item.quantity, item.data)
-                        break
-                    end
                     if FRAMEWORK == 'qb-core' then
                         player.Functions.RemoveItem(item.item_id, item.quantity)
                     elseif FRAMEWORK == 'es_extended' then
@@ -376,7 +366,7 @@ end
 -- @usage local balance = utils.fw.get_balance_by_type(player_source, 'balance_type')
 local function get_balance_by_type(_src, balance_type)
     local balances = get_balances(_src)
-    if not balances then return false end
+    if not balances then print('no balances') return false end
 
     local balance
     if FRAMEWORK == 'boii_core' then
@@ -390,7 +380,13 @@ local function get_balance_by_type(_src, balance_type)
     elseif FRAMEWORK == 'qb-core' then
         balance = balances[balance_type] or 0
     elseif FRAMEWORK == 'es_extended' then
-        balance = balances[balance_type] or 0
+        if balance_type == 'cash' then
+            local cash_item = get_item(_src, 'money')
+            local cash_balance = cash_item and cash_item.count or 0
+            balance = cash_balance
+        else
+            balance = balances[balance_type] and balances[balance_type].amount or 0
+        end
     elseif FRAMEWORK == 'ox_core' then  
         balance = balances or 0
     elseif FRAMEWORK == 'custom' then
@@ -430,7 +426,11 @@ local function adjust_balance(_src, options)
                     if FRAMEWORK == 'qb-core' then
                         player.Functions.AddMoney(op.balance_type, op.amount, options.reason)
                     elseif FRAMEWORK == 'es_extended' then
-                        player.addAccountMoney(op.balance_type, op.amount)
+                        if op.balance_type == 'cash' or op.balance_type == 'money' then
+                            player.addInventoryItem('money', op.amount)
+                        else
+                            player.addAccountMoney(op.balance_type, op.amount)
+                        end
                     elseif FRAMEWORK == 'ox_core' then
                         exports.ox_inventory:AddItem(_src, 'money', op.amount)
                     elseif FRAMEWORK == 'custom' then
@@ -440,7 +440,11 @@ local function adjust_balance(_src, options)
                     if FRAMEWORK == 'qb-core' then
                         player.Functions.RemoveMoney(op.balance_type, op.amount, options.reason)
                     elseif FRAMEWORK == 'es_extended' then
-                        player.removeAccountMoney(op.balance_type, op.amount)
+                        if op.balance_type == 'cash' or op.balance_type == 'money' then
+                            player.removeInventoryItem('money', op.amount)
+                        else
+                            player.removeAccountMoney(op.balance_type, op.amount)
+                        end
                     elseif FRAMEWORK == 'ox_core' then
                         exports.ox_inventory:RemoveItem(_src, 'money', op.amount)
                     elseif FRAMEWORK == 'custom' then
@@ -567,6 +571,7 @@ local function player_has_job(_src, job_names, check_on_duty)
     local player_jobs = get_player_jobs(_src)
     local job_found = false
     local on_duty_status = false
+    print('player has jobs: ' .. json.encode(player_jobs))
     if FRAMEWORK == 'boii_core' then
         if player_jobs.primary and utils.tables.table_contains(job_names, player_jobs.primary.id) then
             job_found = true
@@ -590,7 +595,7 @@ local function player_has_job(_src, job_names, check_on_duty)
             on_duty_status = player_jobs.onduty
         end
     elseif FRAMEWORK == 'es_extended' then
-        if utils.tables.table_contains(job_names, player_jobs.id) then
+        if utils.tables.table_contains(job_names, player_jobs.name) then
             job_found = true
             on_duty_status = player_jobs.onDuty
         end
@@ -714,7 +719,8 @@ local function adjust_statuses(_src, statuses)
             if player.PlayerData.metadata[key] then
                 local current = player.PlayerData.metadata[key]
                 local new_value = math.min(100, math.max(0, current + (mod.add or 0) - (mod.remove or 0)))
-                player.Functions.SetMetaData(key, new_value)
+                player.PlayerData.metadata[key] = new_value
+                player.Functions.UpdatePlayerData()
                 print(string.format("QB-Core: Updated status '%s' for player %d from %.2f to %.2f", key, _src, current, new_value))
             end
         end
