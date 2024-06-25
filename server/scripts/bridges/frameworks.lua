@@ -477,7 +477,7 @@ local function adjust_inventory(_src, options)
                 if options.validation_data.drop_player then
                     DropPlayer(_src, 'Suspected range exploits.')
                 else
-                    utils.notify.send(_src, {
+                    utils.ui.notify(_src, {
                         header = 'Action Denied',
                         message = 'You are too far from the required location to perform this action.',
                         type = 'error',
@@ -676,7 +676,7 @@ local function adjust_balance(_src, options)
                 if options.validation_data.drop_player then
                     DropPlayer(_src, 'Suspected range exploits.')
                 else
-                    utils.notify.send(_src, {
+                    utils.ui.notify(_src, {
                         header = 'Action Denied',
                         message = 'You are too far from the required location to perform this action.',
                         type = 'error',
