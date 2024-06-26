@@ -39,12 +39,12 @@ server_scripts {
     '@oxmysql/lib/MySQL.lua',
     'server/config.lua',
     'server/init.lua',
+    'server/scripts/connections.lua',
     'server/scripts/buckets.lua',
     'server/scripts/callbacks.lua',
     'server/scripts/bridges/notifications.lua',
     'server/scripts/bridges/frameworks.lua',
     'server/scripts/commands.lua',
-    'server/scripts/connections.lua',
     'server/scripts/conversions.lua',
     'server/scripts/cooldowns.lua',
     'server/scripts/database.lua',
@@ -90,7 +90,7 @@ client_scripts {
 }
 
 escrow_ignore {
-    'shared/**/**/*',
-    'client/**/**/**/*',
-    'server/**/**/**/*'
+    'shared/**',
+    'client/**',
+    'server/**'
 }
