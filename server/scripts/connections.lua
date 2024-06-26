@@ -40,10 +40,10 @@ local CREATE_TABLE = [[
 --- @section Tables
 
 --- Temporary table to store connected users before they are fully processed
-local temp_connected_users = {}
+temp_connected_users = {}
 
 --- Table to store fully connected users
-local connected_users = {}
+connected_users = {}
 
 --- @section Database tables
 
