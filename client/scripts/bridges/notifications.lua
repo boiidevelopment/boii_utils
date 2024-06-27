@@ -14,7 +14,15 @@
 
 --- @section Constants
 
-local NOTIFICATIONS = config.ui.notify
+local NOTIFICATIONS
+
+CreateThread(function()
+    while not (config and config.ui and config.ui.notify) do
+        Wait(100)
+    end
+    NOTIFICATIONS = config.ui.notify
+    print('NOTIFICATIONS has been set.')
+end)
 
 --- @section Local functions
 
