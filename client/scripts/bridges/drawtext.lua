@@ -14,7 +14,15 @@
 
 --- @section Constants
 
-local DRAWTEXT = config.ui.drawtext
+local DRAWTEXT
+
+CreateThread(function()
+    while not (config and config.ui and config.ui.drawtext) do
+        Wait(100)
+    end
+    DRAWTEXT = config.ui.drawtext
+    print('DRAWTEXT has been set.')
+end)
 
 --- @section Local functions
 
