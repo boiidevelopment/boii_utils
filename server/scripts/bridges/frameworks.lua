@@ -598,7 +598,7 @@ local function get_balance_by_type(_src, balance_type)
             local cash_balance = cash_item and cash_item.count or 0
             balance = cash_balance
         else
-            balance = balances[balance_type] and balances[balance_type].amount or 0
+            balance = balances[balance_type]
         end
     elseif FRAMEWORK == 'ox_core' then  
         balance = balances or 0
