@@ -12,7 +12,16 @@
 --- Progressbar bridge.
 --- @script client/scripts/bridges/progressbar.lua
 
-local progressbar = config.ui.progressbar
+local PROGRESSBAR
+
+CreateThread(function()
+    while not (config and config.ui and config.ui.progressbar) do
+        Wait(100)
+    end
+    PROGRESSBAR = config.ui.progressbar
+    print('PROGRESSBAR has been set.')
+end)
+
 local progress_active = false
 
 --- Internal Helper function to handle triggering events and notifications
