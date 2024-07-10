@@ -182,31 +182,11 @@ utils.networking.register_data_callback = register_data_callback
 --- @param table_name The name of the table.
 --- @param key The key that was updated.
 --- @param value The new value for the key.
-RegisterNetEvent('boii_utils2:cl:update_synced_data')
-AddEventHandler('boii_utils2:cl:update_synced_data', function(table_name, key, value)
+RegisterNetEvent('boii_utils:cl:update_synced_data')
+AddEventHandler('boii_utils:cl:update_synced_data', function(table_name, key, value)
     if SYNCED_DATA[table_name] then
         SYNCED_DATA[table_name][key] = value
     else
         utils.debug.err('Received data for non-existent table ' .. table_name .. '.')
     end
 end)
-
---- @section Testing
-
-if TESTING then
-
-    RegisterCommand('utils:client_networking_test', function()
-        exports.boii_utils2:networking_create_synced_table('player_data')
-        exports.boii_utils2:networking_set_synced_data('player_data', 'health', 100)
-        exports.boii_utils2:networking_set_bulk_synced_data('player_data', {stamina = 80, hunger = 50})
-        local health = exports.boii_utils2:networking_get_synced_data('player_data', 'health')
-        print('Health:', health)
-        local data = exports.boii_utils2:networking_get_bulk_synced_data('player_data', {'health', 'stamina', 'hunger'})
-        print('Bulk Data:', data.health, data.stamina, data.hunger)
-        exports.boii_utils2:networking_register_data_callback('player_data', 'health', function(old_val, new_val)
-            print('Health changed from', old_val, 'to', new_val)
-        end)
-        exports.boii_utils2:networking_set_synced_data('player_data', 'health', 90)
-    end)
-
-end
