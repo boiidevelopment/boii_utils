@@ -143,7 +143,7 @@ utils.networking.get_bulk_synced_data = get_bulk_synced_data
 --- @param table_name The name of the table.
 --- @param key The key that was updated.
 --- @param value The new value for the key.
-RegisterNetEvent('boii_utils2:sv:sync_data')
-AddEventHandler('boii_utils2:sv:sync_data', function(table_name, key, value)
+RegisterNetEvent('boii_utils:sv:sync_data')
+AddEventHandler('boii_utils:sv:sync_data', function(table_name, key, value)
     set_synced_data(table_name, key, value)
 end)
