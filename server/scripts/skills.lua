@@ -12,6 +12,8 @@
 --- Skill system.
 -- @script server/skills.lua
 
+--- @section Local functions
+
 --- Calculates required experience points for the next level.
 -- @param current_level The current level of the skill.
 -- @param first_level_xp The experience points required for the first level.
@@ -20,6 +22,9 @@
 local function calculate_required_xp(current_level, first_level_xp, growth_factor)
     return math.floor(first_level_xp * (growth_factor ^ (current_level - 1)))
 end
+
+exports('skills_calculate_required_xp', calculate_required_xp)
+utils.skills.calculate_required_xp = calculate_required_xp
 
 --- Inserts a new skill entry for a player if it doesn't already exist.
 -- @param _src The player identifier.
@@ -31,7 +36,8 @@ local function insert_new_skill(_src, skill_name, skill_data)
     MySQL.insert(query, params)
 end
 
---- @section Local functions
+exports('skills_insert_new_skill', insert_new_skill)
+utils.skills.insert_new_skill = insert_new_skill
 
 --- Fetches skill data for a specific skill.
 -- @param _src The player identifier.
@@ -58,6 +64,9 @@ local function get_skill(_src, skill_name)
     return default_skill_data
 end
 
+exports('skills_get_skill', get_skill)
+utils.skills.get_skill = get_skill
+
 --- Fetches all skills for a player.
 -- @param _src The player identifier.
 -- @return All skill data for the player if it exists, an empty table otherwise.
@@ -75,6 +84,9 @@ local function get_all_skills(_src)
     debug_log("warn", "No skills data found in DB for player: " .. _src)
     return {}
 end
+
+exports('skills_get_all_skills', get_all_skills)
+utils.skills.get_all_skills = get_all_skills
 
 --- Modifies a specific skill's experience points for a player.
 -- @param _src The player identifier.
@@ -144,6 +156,9 @@ local function modify_skill(_src, skill_name, value, operation)
         return false
     end
 end
+
+exports('skills_modify_skill', modify_skill)
+utils.skills.modify_skill = modify_skill
 
 --- @section Callbacks
 
