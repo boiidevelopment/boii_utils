@@ -399,24 +399,6 @@ utils.fw.adjust_inventory({
     should_save = true
 })
 ]]
---- Adjusts a player's inventory based on given options.
---- Options include adding or removing items and setting item information.
---- @param _src Player source identifier.
---- @param options Options for inventory adjustment.
---- @usage
---[[
-local items = {
-    {item_id = 'burger', action = 'add', quantity = 3},
-    {item_id = 'water', action = 'remove', quantity = 1},
-}    
-local validation_data = { location = vector3(100.0, 100.0, 20.0), distance = 10.0, drop_player = true }
-utils.fw.adjust_inventory({
-    items = items, 
-    validation_data = validation_data, 
-    note = 'Used a pawnshop.', 
-    should_save = true
-})
-]]
 local function adjust_inventory(_src, options)
     local player = get_player(_src)
     if not player then return false end
@@ -723,26 +705,19 @@ utils.fw.get_player_jobs = get_player_jobs
 -- @param job_names An array of job names to check against the player's jobs.
 -- @param check_on_duty Optional boolean to also check if the player is on-duty for the job.
 -- @return Boolean indicating if the player has any of the specified jobs and meets the on-duty condition.
-local function player_has_job(_src, job_names, check_on_duty)
+local function player_has_job(_src, job_names)
     local player_jobs = get_player_jobs(_src)
     local job_found = false
     local on_duty_status = false
-    print('player has jobs: ' .. json.encode(player_jobs))
     if FRAMEWORK == 'boii_core' then
         if player_jobs.primary and utils.tables.table_contains(job_names, player_jobs.primary.id) then
             job_found = true
             on_duty_status = player_jobs.primary.on_duty
-            if check_on_duty and not on_duty_status then
-                return false
-            end
         end
         for _, secondary_job in ipairs(player_jobs.secondary or {}) do
             if utils.tables.table_contains(job_names, secondary_job.id) then
                 job_found = true
                 on_duty_status = secondary_job.on_duty
-                if check_on_duty and not on_duty_status then
-                    return false
-                end
             end
         end
     elseif FRAMEWORK == 'qb-core' then
