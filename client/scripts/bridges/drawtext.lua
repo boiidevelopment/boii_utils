@@ -53,7 +53,7 @@ local function show_drawtext(options)
 end
 
 exports('ui_show_drawtext', show_drawtext)
-utils.ui.notify = show_drawtext
+utils.ui.show_drawtext = show_drawtext
 
 --- Hide drawtext.
 --- @function hide_drawtext
