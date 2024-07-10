@@ -72,6 +72,19 @@ utils.version = utils.version or {}
 --- @field zones: Stores all zones functions for use externally.
 utils.zones = utils.zones or {}
 
+--- @section Global functions
+
+--- Logs debug messages for the reputation section.
+--- This function is used internally for debugging purposes.
+--- @function debug_log
+--- @param type string: The type of log (e.g., 'info', 'err').
+--- @param message string: The message to log.
+function debug_log(type, message)
+    if config.debug and utils.debug[type] then
+        utils.debug[type](message)
+    end
+end
+
 --- @section Local functions
 
 --- Sends config to client on resource load.
