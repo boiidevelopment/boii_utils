@@ -189,10 +189,14 @@ utils.groups.get_all_group_names = get_all_group_names
 local function get_player_groups(player_id)
     local groups_for_player = {}
     for name, group_data in pairs(player_groups) do
-        for _, player in ipairs(group_data.members) do
-            if player.id == player_id then
-                groups_for_player[#groups_for_player + 1] = name
-                break
+        if group_data.leader.id == player_id then
+            groups_for_player[#groups_for_player + 1] = name
+        else
+            for _, player in ipairs(group_data.members) do
+                if player.id == player_id then
+                    groups_for_player[#groups_for_player + 1] = name
+                    break
+                end
             end
         end
     end
@@ -201,6 +205,7 @@ end
 
 exports('groups_get_player_groups', get_player_groups)
 utils.groups.get_player_groups = get_player_groups
+
 
 --- Function to get all players of a specific group type.
 --- @param type The type of group to get players for.
