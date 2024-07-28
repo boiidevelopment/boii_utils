@@ -31,7 +31,7 @@ CreateThread(function()
     end
 
     while not FRAMEWORK do
-        Wait(500)
+        Wait(100)
     end
 
     if FRAMEWORK == 'boii_core' then
@@ -54,6 +54,16 @@ CreateThread(function()
 end)
 
 --- @section Local functions
+
+local function get_framework()
+    while not FRAMEWORK do
+        Wait(100)
+    end
+    return FRAMEWORK
+end
+
+exports('fw_get_framework', get_framework)
+utils.fw.get_framework = get_framework
 
 --- Retrieves all players based on framework
 --- @return players table
@@ -611,10 +621,13 @@ utils.fw.adjust_balance(_src, {
 })
 ]]
 local function adjust_balance(_src, options)
+    print('starting adjust balance')
     local player = get_player(_src)
-    if not player then return false end
+    if not player then print('player not found') return end
     local function proceed()
+        print('framework: '.. FRAMEWORK)
         if FRAMEWORK == 'boii_core' then
+            print('is boii_core')
             player.modify_balances(options.operations, options.reason, options.should_save)
         else
             for _, op in ipairs(options.operations) do
@@ -653,8 +666,10 @@ local function adjust_balance(_src, options)
     if options.validation_data then
         utils.callback.validate_distance(_src, options.validation_data, function(is_valid)
             if is_valid then
+                print('is_valid transaction: ' .. tostring(is_valid))
                 proceed()
             else
+                print('not a valid transaction')
                 if options.validation_data.drop_player then
                     DropPlayer(_src, 'Suspected range exploits.')
                 else
@@ -911,6 +926,34 @@ end
 exports('fw_adjust_statuses', adjust_statuses)
 utils.fw.adjust_statuses = adjust_statuses
 
+--- Register an item as usable for different frameworks.
+--- @param item string: The item identifier.
+--- @param cb function: The callback function to execute when the item is used.
+local function register_item(item, cb)
+    if not item then 
+        debug_log('warn', 'Function: register_item | Note: Item identifier is missing') 
+        return 
+    end
+    if FRAMEWORK == 'boii_core' then
+        utils.items.register(item, function(source)
+            cb(source)
+        end)
+    elseif FRAMEWORK == 'qb-core' then
+        fw.Functions.CreateUseableItem(item, function(source)
+            cb(source)
+        end)
+    elseif FRAMEWORK == 'es_extended' then
+        fw.RegisterUsableItem(item, function(source)
+            cb(source)
+        end)
+    else
+        debug_log('warn', 'Function: register_item | Note: Unsupported framework: ' .. tostring(FRAMEWORK))
+    end
+end
+
+exports('fw_register_item', register_item)
+utils.fw.register_item = register_item
+
 --- @section Callbacks
 
 --- Callback for checking if player has item by quantity.
@@ -970,7 +1013,7 @@ end)
 -- This runs internally meaning it is not a exportable function it simply creates tables required for the utils sections
 local function create_skill_tables()
     while not FRAMEWORK do
-        Wait(500)
+        Wait(100)
     end
     utils.debug.info("Creating skills table if not exists...")
     local query
@@ -1022,7 +1065,7 @@ create_skill_tables()
 -- Create sql tables required by rep system
 local function create_rep_tables()
     while not FRAMEWORK do
-        Wait(500)
+        Wait(100)
     end
     utils.debug.info("Creating reputations table if not exists...")
     local query
@@ -1075,7 +1118,7 @@ create_rep_tables()
 -- This runs internally meaning it is not a exportable function it simply creates tables required for the utils sections
 local function create_licence_tables()
     while not FRAMEWORK do
-        Wait(500)
+        Wait(100)
     end
     utils.debug.info("Creating licence table if not exists...")
     local query
