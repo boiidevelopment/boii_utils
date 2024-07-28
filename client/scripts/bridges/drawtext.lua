@@ -30,7 +30,8 @@ end)
 --- @function show_drawtext
 --- @param options table: The drawtext ui options (header, message, icon).
 local function show_drawtext(options)
-    if not options or options.message then
+    print('drawtext options: ' .. json.encode(options))
+    if not options or not options.message then
         print('Invalid drawtext data provided')
         return
     end
