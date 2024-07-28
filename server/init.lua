@@ -33,6 +33,9 @@ utils.connections = utils.connections or {}
 --- @field cooldowns: Stores all cooldowns functions for use externally.
 utils.cooldowns = utils.cooldowns or {}
 
+--- @field ui: Stores all ui functions for use externally.
+utils.ui = utils.ui or {}
+
 --- @field fw: Stores all fw bridge functions for use externally.
 utils.fw = utils.fw or {}
 
@@ -62,9 +65,6 @@ utils.scope = utils.scope or {}
 
 --- @field skills: Stores all skills functions for use externally.
 utils.skills = utils.skills or {}
-
---- @field ui: Stores all ui functions for use externally.
-utils.ui = utils.ui or {}
 
 --- @field version: Stores all version functions for use externally.
 utils.version = utils.version or {}
