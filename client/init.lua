@@ -48,6 +48,9 @@ utils.entities = utils.entities or {}
 --- @field environment: Stores all environment functions for use externally.
 utils.environment = utils.environment or {}
 
+--- @field ui: Stores all ui bridge functions for use externally.
+utils.ui = utils.ui or {}
+
 --- @field fw: Stores all framework bridge functions for use externally.
 utils.fw = utils.fw or {}
 
@@ -72,9 +75,6 @@ utils.requests = utils.requests or {}
 --- @field skills: Stores all skills functions for use externally.
 utils.skills = utils.skills or {}
 
---- @field requests: Stores all ui bridge functions for use externally.
-utils.ui = utils.ui or {}
-
 --- @field target: Stores all target bridge functions for use externally.
 utils.target = utils.target or {}
 
@@ -86,6 +86,9 @@ utils.zones = utils.zones or {}
 
 --- @field networking: Stores all networking functions for use externally.
 utils.networking = utils.networking or {}
+
+--- @field target: Stores all target bridge functions for use externally.
+utils.target = utils.target or {}
 
 --- @section Global functions
 
