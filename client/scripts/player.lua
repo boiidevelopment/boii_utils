@@ -161,12 +161,30 @@ utils.player.get_distance_to_entity = get_distance_to_entity
         flags = 49,
         duration = 5000,
         freeze = true,
-        continuous = true, -- Set to true for continuous animation
-        prop = {
-            model = 'prop_tool_broom',
-            bone = 57005,
-            offset = {x = 0.1, y = 0.0, z = -0.01},
-            rotation = {x = 90.0, y = 0.0, z = 90.0}
+        continuous = true,
+        props = {
+            {
+                model = 'prop_cs_burger_01',
+                bone = 57005,
+                coords = vector3(0.13, 0.05, 0.02),
+                rotation = vector3(-50.0, 16.0, 60.0), 
+                soft_pin = false, 
+                collision = false, 
+                is_ped = true, 
+                rot_order = 1, 
+                sync_rot = true 
+            },
+            {
+                model = 'ba_prop_club_water_bottle',
+                bone = 60309,
+                coords = vector3(0.0, 0.0, 0.05),
+                rotation = vector3(0.0, 0.0, 0.0), 
+                soft_pin = false, 
+                collision = false, 
+                is_ped = true, 
+                rot_order = 1, 
+                sync_rot = true 
+            }
         }
     }, function()
         print('animation finished')
@@ -186,11 +204,14 @@ local function play_animation(player, options, callback)
         FreezeEntityPosition(player, true)
     end
     local duration = options.duration or 2000
-    local prop
-    if options.prop then
-        utils.requests.model(options.prop.model)
-        prop = CreateObject(GetHashKey(options.prop.model), GetEntityCoords(player), true, true, true)
-        AttachEntityToEntity(prop, player, GetPedBoneIndex(player, options.prop.bone), options.prop.coords.x, options.prop.coords.y, options.prop.coords.z, options.prop.rotation.x, options.prop.rotation.y, options.prop.rotation.z, true, true, false, true, 1, true)
+    local props = {}
+    if options.props then
+        for _, prop in ipairs(options.props) do
+            utils.requests.model(prop.model)
+            local prop_entity = CreateObject(GetHashKey(prop.model), GetEntityCoords(player), true, true, true)
+            AttachEntityToEntity(prop_entity, player, GetPedBoneIndex(player, prop.bone), prop.coords.x or 0.0, prop.coords.y or 0.0, prop.coords.z or 0.0, prop.rotation.x or 0.0, prop.rotation.y or 0.0, prop.rotation.z or 0.0, true, prop.use_soft or false, prop.collision or false, prop.is_ped or true, prop.rot_order or 1, prop.sync_rot or true)
+            props[#props + 1] = prop_entity
+        end
     end
     if options.continuous then
         TaskPlayAnim(player, options.dict, options.anim, options.blend_in or 8.0, options.blend_out or -8.0, -1, options.flags or 49, options.playback or 0, options.lock_x or 0, options.lock_y or 0, options.lock_z or 0)
@@ -201,8 +222,8 @@ local function play_animation(player, options, callback)
         if options.freeze then
             FreezeEntityPosition(player, false)
         end
-        if prop then
-            DeleteObject(prop)
+        for _, prop_entity in ipairs(props) do
+            DeleteObject(prop_entity)
         end
         if callback then
             callback()
@@ -212,6 +233,8 @@ end
 
 exports('player_play_animation', play_animation)
 utils.player.play_animation = play_animation
+
+
 
 --- Checks if the player is in water.
 --- @function is_player_in_water
