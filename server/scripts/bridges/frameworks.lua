@@ -294,7 +294,7 @@ local function has_item(_src, item_name, item_amount)
 
     if GetResourceState('ox_inventory') == 'started' then
         local count = exports.ox_inventory:Search(_src, 'count', item_name)
-        local value = count_table[string.upper(item_name)]
+        local value = count[string.upper(item_name)]
         return value ~= nil and value >= required_amount
     end
     
@@ -309,7 +309,7 @@ local function has_item(_src, item_name, item_amount)
         return item ~= nil and item.count >= required_amount
     elseif FRAMEWORK == 'ox_core' then
         local count = exports.ox_inventory:Search(_src, 'count', item_name)
-        local value = count_table[string.upper(item_name)]
+        local value = count[string.upper(item_name)]
         return value ~= nil and value >= required_amount
     elseif FRAMEWORK == 'custom' then
         -- Custom framework logic
