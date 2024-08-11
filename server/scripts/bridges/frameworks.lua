@@ -28,6 +28,8 @@ CreateThread(function()
         FRAMEWORK = 'es_extended'
     elseif GetResourceState('ox_core') == 'started' then
         FRAMEWORK = 'ox_core'
+    elseif GetResourceState('boii_lua') == 'started' then
+        FRAMEWORK = 'custom'
     end
 
     while not FRAMEWORK do
@@ -257,9 +259,14 @@ utils.fw.get_identity = get_identity
 local function get_identity_by_id(user_id)
     local players = get_players()
     for _, player in ipairs(players) do
-        local p_id = get_player_id(player.source)
+        if type(player) == 'table' then
+            p_source = player.source
+        else
+            p_source = player
+        end
+        local p_id = get_player_id(p_source)
         if p_id == user_id then
-            local identity = get_identity(player.source)
+            local identity = get_identity(p_source)
             return identity
         end
     end
@@ -287,20 +294,23 @@ local function has_item(_src, item_name, item_amount)
 
     if GetResourceState('ox_inventory') == 'started' then
         local count = exports.ox_inventory:Search(_src, 'count', item_name)
-        return count ~= nil and count >= required_amount
+        local value = count_table[string.upper(item_name)]
+        return value ~= nil and value >= required_amount
     end
-
+    
     if FRAMEWORK == 'boii_core' then
         return player.has_item(item_name, required_amount)
     elseif FRAMEWORK == 'qb-core' then
         local item = player.Functions.GetItemByName(item_name)
         return item ~= nil and item.amount >= required_amount
     elseif FRAMEWORK == 'es_extended' then
+        print('es_extended has_item')
         local item = player.getInventoryItem(item_name)
         return item ~= nil and item.count >= required_amount
     elseif FRAMEWORK == 'ox_core' then
         local count = exports.ox_inventory:Search(_src, 'count', item_name)
-        return count ~= nil and count >= required_amount
+        local value = count_table[string.upper(item_name)]
+        return value ~= nil and value >= required_amount
     elseif FRAMEWORK == 'custom' then
         -- Custom framework logic
     end
@@ -434,6 +444,7 @@ local function adjust_inventory(_src, options)
                             exports.ox_inventory:AddItem(_src, item.item_id, item.quantity, item.data)
                         else
                             player.Functions.AddItem(item.item_id, item.quantity, nil, item.data)
+                            TriggerClientEvent('qb-inventory:client:ItemBox', _src, fw.Shared.Items[item.item_id], 'add', item.quantity)
                         end
                     elseif FRAMEWORK == 'es_extended' then
                         player.addInventoryItem(item.item_id, item.quantity)
@@ -448,6 +459,7 @@ local function adjust_inventory(_src, options)
                             exports.ox_inventory:RemoveItem(_src, item.item_id, item.quantity, item.data)
                         else
                             player.Functions.RemoveItem(item.item_id, item.quantity)
+                            TriggerClientEvent('qb-inventory:client:ItemBox', _src, fw.Shared.Items[item.item_id], 'remove', item.quantity)
                         end
                     elseif FRAMEWORK == 'es_extended' then
                         player.removeInventoryItem(item.item_id, item.quantity)
