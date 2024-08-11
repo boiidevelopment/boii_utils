@@ -188,23 +188,13 @@ utils.character_creation.set_ped_appearance = set_ped_appearance
 --- @param index string: The specific index within the data type being updated.
 --- @param data table: The new values to be set.
 local function update_ped_data(sex, category, id, value)
-    debug_log('info', 'Function: update_ped_data called with parameters:')
-    debug_log('info', 'Sex: ' .. sex)
-    debug_log('info', 'Category: ' .. category)
-    debug_log('info', 'ID: ' .. id)
-    debug_log('info', 'Value: ' .. tostring(value))
-
     if not sex or not category or not id or not value then 
         debug_log('err', 'Function: update_ped_data failed | Reason: Missing one or more required parameters. - sex, category, id, or value.') 
         return 
     end
-
     if id == 'resemblance' or id == 'skin' then
         value = value / 100
     end
-
-    debug_log('info', 'Updating utils.shared.style...')
-
     if type(utils.shared.style[sex][category][id]) == 'table' then
         for k, _ in pairs(utils.shared.style[sex][category][id]) do
             utils.shared.style[sex][category][id][k] = value[k]
@@ -212,10 +202,6 @@ local function update_ped_data(sex, category, id, value)
     else
         utils.shared.style[sex][category][id] = value
     end
-
-    debug_log('info', 'Updated style data:')
-    debug_log('info', 'utils.shared.style[' .. sex .. '][' .. category .. '][' .. id .. '] = ' .. tostring(value))
-
     current_sex = sex
     local player_ped = PlayerPedId()
     set_ped_appearance(player_ped, utils.shared.style[sex])
