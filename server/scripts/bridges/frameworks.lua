@@ -37,7 +37,7 @@ CreateThread(function()
     end
 
     if FRAMEWORK == 'boii_core' then
-        fw = exports.boii_core:get_object()
+        fw = exports.boii_core:get()
     elseif FRAMEWORK == 'qb-core' then
         fw = exports['qb-core']:GetCoreObject()
     elseif FRAMEWORK == 'es_extended' then
@@ -145,8 +145,8 @@ local function get_id_params(_src)
     local player = get_player(_src)
     local query, params
     if FRAMEWORK == 'boii_core' then
-        query = 'unique_id = ? AND char_id = ?'
-        params = { player.unique_id, player.char_id }
+        query = 'passport = ?'
+        params = { player.passport }
     elseif FRAMEWORK == 'qb-core' then
         query = 'citizenid = ?'
         params = { player.PlayerData.citizenid }
@@ -177,9 +177,9 @@ local function get_insert_params(_src, data_type, data_name, data)
     local player = get_player(_src)
     local columns, values, params
     if FRAMEWORK == 'boii_core' then
-        columns = {'unique_id', 'char_id', data_type}
-        values = '?, ?, ?'
-        params = { player.unique_id, player.char_id, json.encode(data) }
+        columns = {'passport', data_type}
+        values = '?, ?'
+        params = { player.passport, json.encode(data) }
     elseif FRAMEWORK == 'qb-core' then
         columns = {'citizenid', data_type}
         values = '?, ?'
@@ -214,8 +214,9 @@ local function get_identity(_src)
     if FRAMEWORK == 'boii_core' then
         player_data = {
             first_name = player.data.identity.first_name,
+            middle_name = player.data.identity.middle_name or nil,
             last_name = player.data.identity.last_name,
-            dob = player.data.identity.dob,
+            dob = player.data.identity.date_of_birth,
             sex = player.data.identity.sex,
             nationality = player.data.identity.nationality
         }
@@ -294,8 +295,7 @@ local function has_item(_src, item_name, item_amount)
 
     if GetResourceState('ox_inventory') == 'started' then
         local count = exports.ox_inventory:Search(_src, 'count', item_name)
-        local value = count[string.upper(item_name)]
-        return value ~= nil and value >= required_amount
+        return count ~= nil and count >= required_amount
     end
     
     if FRAMEWORK == 'boii_core' then
@@ -309,8 +309,7 @@ local function has_item(_src, item_name, item_amount)
         return item ~= nil and item.count >= required_amount
     elseif FRAMEWORK == 'ox_core' then
         local count = exports.ox_inventory:Search(_src, 'count', item_name)
-        local value = count[string.upper(item_name)]
-        return value ~= nil and value >= required_amount
+        return count ~= nil and count >= required_amount
     elseif FRAMEWORK == 'custom' then
         -- Custom framework logic
     end
@@ -1072,7 +1071,7 @@ local function create_skill_tables()
     end
     MySQL.update(query, {})
 end
-create_skill_tables()
+--create_skill_tables()
 
 -- Create sql tables required by rep system
 local function create_rep_tables()
@@ -1124,7 +1123,7 @@ local function create_rep_tables()
     end
     MySQL.update(query, {})
 end
-create_rep_tables()
+--create_rep_tables()
 
 -- Function to create sql table on load if not created already
 -- This runs internally meaning it is not a exportable function it simply creates tables required for the utils sections
@@ -1177,4 +1176,4 @@ local function create_licence_tables()
     end
     MySQL.update(query, {})
 end
-create_licence_tables()
+--create_licence_tables()
