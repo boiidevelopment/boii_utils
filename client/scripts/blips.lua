@@ -30,62 +30,19 @@ local category_state = {}
 --- @param blip_data table: Contains data for the blip creation like coordinates, sprite, color, scale, label, and category.
 --- @usage utils.blips.create_blip({ coords = vector3(100.0, 200.0, 30.0), sprite = 1, colour = 1, scale = 1.5, label = 'Blip 1', category = 'shop', show = true })
 local function create_blip(blip_data)
-    if blip_data.show then
-        local blip = AddBlipForCoord(blip_data.coords.x, blip_data.coords.y, blip_data.coords.z)
-        SetBlipSprite(blip, blip_data.sprite)
-        SetBlipColour(blip, blip_data.colour)
-        SetBlipScale(blip, blip_data.scale)
-        SetBlipAsShortRange(blip, true)
-        BeginTextCommandSetBlipName('STRING')
-        AddTextComponentString(blip_data.label)
-        EndTextCommandSetBlipName(blip)
-        created_blips[#created_blips + 1] = {
-            blip = blip, 
-            category = blip_data.category,
-            label = blip_data.label,
-            coords = blip_data.coords,
-            sprite = blip_data.sprite,
-            colour = blip_data.colour,
-            scale = blip_data.scale
-        }
-        category_state[blip_data.category] = true
-    end
+    local blip = AddBlipForCoord(blip_data.coords.x, blip_data.coords.y, blip_data.coords.z)
+    SetBlipSprite(blip, blip_data.sprite)
+    SetBlipColour(blip, blip_data.colour)
+    SetBlipScale(blip, blip_data.scale)
+    SetBlipAsShortRange(blip, true)
+    BeginTextCommandSetBlipName('STRING')
+    AddTextComponentString(blip_data.label)
+    EndTextCommandSetBlipName(blip)
+    created_blips[blip] = {blip = blip, category = blip_data.category, label = blip_data.label, coords = blip_data.coords, sprite = blip_data.sprite, colour = blip_data.colour, scale = blip_data.scale}
 end
 
 exports('blips_create_blip', create_blip)
 utils.blips.create_blip = create_blip
-
---- Show or hide all blips.
---- @function toggle_all_blips
---- @param visible boolean: Indicates whether to show (true) or hide (false) all blips.
---- @usage utils.blips.toggle_all_blips(true) -- Show all blips
-local function toggle_all_blips(visible)
-    local id = visible and 2 or 0
-    for _, blip_data in ipairs(created_blips) do
-        SetBlipDisplay(blip_data.blip, id)
-    end
-    BLIPS_ENABLED = visible
-end
-
-exports('blips_toggle_all_blips', toggle_all_blips)
-utils.blips.toggle_all_blips = toggle_all_blips
-
---- Toggle blips based on their category.
---- @function toggle_blips_by_category
---- @param category string: The category of blips to show or hide.
---- @param state boolean: The new state of the blips in the specified category.
---- @usage utils.blips.toggle_blips_by_category('shop', false) -- Hide blips in the 'shop' category
-local function toggle_blips_by_category(category, state)
-    for _, blip_data in ipairs(created_blips) do
-        if blip_data.category == category then
-            SetBlipDisplay(blip_data.blip, state and 3 or 0)
-        end
-    end
-    category_state[category] = state
-end
-
-exports('blips_toggle_blips_by_category', toggle_blips_by_category)
-utils.blips.toggle_blips_by_category = toggle_blips_by_category
 
 --- Create multiple blips from a data table.
 --- @function create_blips
@@ -107,27 +64,64 @@ end
 exports('blips_create_blips', create_blips)
 utils.blips.create_blips = create_blips
 
---- Remove a single blip.
+--- Show or hide all blips.
+--- @function toggle_all_blips
+--- @param visible boolean: Indicates whether to show (true) or hide (false) all blips.
+--- @usage utils.blips.toggle_all_blips(true) -- Show all blips
+local function toggle_all_blips(visible)
+    local id = visible and 2 or 0
+    for blip_id, blip_data in pairs(created_blips) do
+        SetBlipDisplay(blip_id, id)
+    end
+    BLIPS_ENABLED = visible
+end
+
+exports('blips_toggle_all_blips', toggle_all_blips)
+utils.blips.toggle_all_blips = toggle_all_blips
+
+--- Toggle blips based on their category.
+--- @function toggle_blips_by_category
+--- @param category string: The category of blips to show or hide.
+--- @param state boolean: The new state of the blips in the specified category.
+--- @usage utils.blips.toggle_blips_by_category('shop', false) -- Hide blips in the 'shop' category
+local function toggle_blips_by_category(category, state)
+    for blip_id, blip_data in pairs(created_blips) do
+        if blip_data.category == category then
+            SetBlipDisplay(blip_id, state and 2 or 0)
+        end
+    end
+    category_state[category] = state
+end
+
+exports('blips_toggle_blips_by_category', toggle_blips_by_category)
+utils.blips.toggle_blips_by_category = toggle_blips_by_category
+
+--- Remove a single blip and update the created_blips table.
 --- @function remove_blip
---- @param blip number: The blip to remove.
+--- @param blip number: The blip identifier to remove.
 --- @usage utils.blips.remove_blip(blip)
 local function remove_blip(blip)
-    RemoveBlip(blip)
+    if DoesBlipExist(blip) then
+        RemoveBlip(blip)
+    end
+    if created_blips[blip] then
+        created_blips[blip] = nil
+    end
 end
 
 exports('blips_remove_blip', remove_blip)
 utils.blips.remove_blip = remove_blip
 
+
 --- Remove all created blips.
 --- @function remove_all_blips
 --- @usage utils.blips.remove_all_blips()
 local function remove_all_blips()
-    for _, blip_data in ipairs(created_blips) do
-        remove_blip(blip_data.blip)
+    for blip_id in pairs(created_blips) do
+        remove_blip(blip_id)
     end
     created_blips = {}
 end
-
 exports('blips_remove_all_blips', remove_all_blips)
 utils.blips.remove_all_blips = remove_all_blips
 
@@ -136,18 +130,14 @@ utils.blips.remove_all_blips = remove_all_blips
 --- @param categories table: A list of categories to remove blips from.
 --- @usage utils.blips.remove_blips_by_categories({'shop', 'house'}) -- Remove blips in the 'shop' and 'house' categories
 local function remove_blips_by_categories(categories)
-    local initialCount = #created_blips
-    for i = #created_blips, 1, -1 do
-        local blip_data = created_blips[i]
-        for _, category in pairs(categories) do
+    for blip_id, blip_data in pairs(created_blips) do
+        for _, category in ipairs(categories) do
             if blip_data.category == category then
-                remove_blip(blip_data.blip)
-                table.remove(created_blips, i)
+                remove_blip(blip_id)
                 break
             end
         end
     end
-    utils.debug.log(string.format("Removed %d blips. Remaining blips: %d", initialCount - #created_blips, #created_blips))
 end
 
 exports('blips_remove_blips_by_categories', remove_blips_by_categories)
@@ -183,7 +173,7 @@ local function create_blip_alpha(options)
     SetBlipColour(blip, options.colour)
     SetBlipScale(blip, options.scale)
     SetBlipAsShortRange(blip, true)
-    BeginTextCommandSetBlipName("STRING")
+    BeginTextCommandSetBlipName('STRING')
     AddTextComponentString(options.label)
     EndTextCommandSetBlipName(blip)
     local alpha = options.alpha
@@ -226,14 +216,11 @@ utils.blips.create_blip_alpha = create_blip_alpha
 --- @usage utils.blips.update_blip_label(blip, 'New Label')
 local function update_blip_label(blip, new_label)
     if DoesBlipExist(blip) then
-        BeginTextCommandSetBlipName("STRING")
+        BeginTextCommandSetBlipName('STRING')
         AddTextComponentString(new_label)
         EndTextCommandSetBlipName(blip)
-        for _, blip_data in ipairs(created_blips) do
-            if blip_data.blip == blip then
-                blip_data.label = new_label
-                break
-            end
+        if created_blips[blip] then
+            created_blips[blip].label = new_label
         end
     end
 end
@@ -249,11 +236,8 @@ utils.blips.update_blip_label = update_blip_label
 local function update_blip_sprite(blip, new_sprite)
     if DoesBlipExist(blip) then
         SetBlipSprite(blip, new_sprite)
-        for _, blip_data in ipairs(created_blips) do
-            if blip_data.blip == blip then
-                blip_data.sprite = new_sprite
-                break
-            end
+        if created_blips[blip] then
+            created_blips[blip].sprite = new_sprite
         end
     end
 end
@@ -269,11 +253,8 @@ utils.blips.update_blip_sprite = update_blip_sprite
 local function update_blip_colour(blip, new_colour)
     if DoesBlipExist(blip) then
         SetBlipColour(blip, new_colour)
-        for _, blip_data in ipairs(created_blips) do
-            if blip_data.blip == blip then
-                blip_data.colour = new_colour
-                break
-            end
+        if created_blips[blip] then
+            created_blips[blip].colour = new_colour
         end
     end
 end
@@ -289,11 +270,8 @@ utils.blips.update_blip_colour = update_blip_colour
 local function update_blip_scale(blip, new_scale)
     if DoesBlipExist(blip) then
         SetBlipScale(blip, new_scale)
-        for _, blip_data in ipairs(created_blips) do
-            if blip_data.blip == blip then
-                blip_data.scale = new_scale
-                break
-            end
+        if created_blips[blip] then
+            created_blips[blip].scale = new_scale
         end
     end
 end
@@ -342,9 +320,9 @@ utils.blips.get_all_blips = get_all_blips
 --- @usage local shop_blips = utils.blips.get_blips_by_category('shop')
 local function get_blips_by_category(category)
     local blips = {}
-    for _, blip_data in ipairs(created_blips) do
+    for blip_id, blip_data in pairs(created_blips) do
         if blip_data.category == category then
-            blips[#blips+1] = blip_data.blip
+            blips[#blips+1] = blip_id
         end
     end
     return blips
@@ -359,10 +337,8 @@ utils.blips.get_blips_by_category = get_blips_by_category
 --- @return string: The label of the blip.
 --- @usage local label = utils.blips.get_blip_label(blip)
 local function get_blip_label(blip)
-    for _, blip_data in ipairs(created_blips) do
-        if blip_data.blip == blip then
-            return blip_data.label
-        end
+    if created_blips[blip] then
+        return created_blips[blip].label
     end
     return ''
 end
@@ -390,8 +366,8 @@ utils.blips.pulse_blip = pulse_blip
 --- @usage utils.blips.flash_blip(blip, 5)
 local function flash_blip(blip, duration)
     if DoesBlipExist(blip) then
-        BeginTextCommandSetBlipFlashes("STRING")
-        AddTextComponentString(" ")
+        BeginTextCommandSetBlipFlashes('STRING')
+        AddTextComponentString(' ')
         EndTextCommandSetBlipFlashes(blip)
         Citizen.SetTimeout(duration * 1000, function()
             EndTextCommandSetBlipFlashes(blip)
@@ -435,10 +411,9 @@ utils.blips.set_blip_priority = set_blip_priority
 --- @param label string: The label of the blip to remove.
 --- @usage utils.blips.remove_blip_by_label('Blip Label')
 local function remove_blip_by_label(label)
-    for i = #created_blips, 1, -1 do
-        if created_blips[i].label == label then
-            remove_blip(created_blips[i].blip)
-            table.remove(created_blips, i)
+    for blip_id, blip_data in pairs(created_blips) do
+        if blip_data.label == label then
+            remove_blip(blip_id)
         end
     end
 end
