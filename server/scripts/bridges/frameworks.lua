@@ -1071,7 +1071,7 @@ local function create_skill_tables()
     end
     MySQL.update(query, {})
 end
---create_skill_tables()
+create_skill_tables()
 
 -- Create sql tables required by rep system
 local function create_rep_tables()
@@ -1123,7 +1123,7 @@ local function create_rep_tables()
     end
     MySQL.update(query, {})
 end
---create_rep_tables()
+create_rep_tables()
 
 -- Function to create sql table on load if not created already
 -- This runs internally meaning it is not a exportable function it simply creates tables required for the utils sections
@@ -1176,4 +1176,4 @@ local function create_licence_tables()
     end
     MySQL.update(query, {})
 end
---create_licence_tables()
+create_licence_tables()
