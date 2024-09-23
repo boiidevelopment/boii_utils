@@ -300,7 +300,8 @@ local function has_item(_src, item_name, item_amount)
     -- ox_inventory
     if GetResourceState('ox_inventory') == 'started' then
         local count = exports.ox_inventory:Search(_src, 'count', item_name)
-        return count ~= nil and count[item_name] >= required_amount
+        if item_name:sub(0, 7) == 'weapon_' then item_name = string.upper(item_name) end
+        return count ~= nil and count[string.upper(item_name)] >= required_amount
     end
     
     -- Framework-specific logic
@@ -315,7 +316,8 @@ local function has_item(_src, item_name, item_amount)
         return item ~= nil and item.count >= required_amount
     elseif FRAMEWORK == 'ox_core' then
         local count = exports.ox_inventory:Search(_src, 'count', item_name)
-        return count ~= nil and count[item_name] >= required_amount
+        if item_name:sub(0, 7) == 'weapon_' then item_name = string.upper(item_name) end
+        return count ~= nil and count[string.upper(item_name)] >= required_amount
     elseif FRAMEWORK == 'custom' then
         -- Custom framework logic
     end
