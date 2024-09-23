@@ -6,7 +6,7 @@
 --- Table to store ped style values
 --- @field ped_styles: Stores clothing and feature values for player ped.
 local ped_styles = { 
-    male = { 
+    m = { 
         genetics = { 
             mother = 0,
             father = 0,
@@ -104,18 +104,18 @@ local ped_styles = {
             neck_texture = 0
         },
         tattoos = { 
-            ZONE_HEAD = { name = '', label = '', hash_male = '', hash_female = '', collection = '' },
-            ZONE_TORSO = { name = '', label = '', hash_male = '', hash_female = '', collection = '' },
-            ZONE_LEFT_ARM = {  name = '', label = '', hash_male = '', hash_female = '', collection = '' },
-            ZONE_RIGHT_ARM = {  name = '', label = '', hash_male = '', hash_female = '', collection = '' },
-            ZONE_LEFT_LEG = {  name = '', label = '', hash_male = '', hash_female = '', collection = '' },
-            ZONE_RIGHT_LEG = {  name = '', label = '', hash_male = '', hash_female = '', collection = '' }
+            ZONE_HEAD = { name = '', label = '', hash_m = '', hash_f = '', collection = '' },
+            ZONE_TORSO = { name = '', label = '', hash_m = '', hash_f = '', collection = '' },
+            ZONE_LEFT_ARM = {  name = '', label = '', hash_m = '', hash_f = '', collection = '' },
+            ZONE_RIGHT_ARM = {  name = '', label = '', hash_m = '', hash_f = '', collection = '' },
+            ZONE_LEFT_LEG = {  name = '', label = '', hash_m = '', hash_f = '', collection = '' },
+            ZONE_RIGHT_LEG = {  name = '', label = '', hash_m = '', hash_f = '', collection = '' }
         }
     },
-    female = { 
+    f = { 
         genetics = { 
-            mother = 1,
-            father = 1,
+            mother = 0,
+            father = 0,
             resemblence = 0,
             skin = 0,
             eye_colour = 1,
@@ -210,22 +210,33 @@ local ped_styles = {
             neck_texture = 0
         },
         tattoos = { 
-            ZONE_HEAD = { name = '', label = '', hash_male = '', hash_female = '', collection = '' },
-            ZONE_TORSO = { name = '', label = '', hash_male = '', hash_female = '', collection = '' },
-            ZONE_LEFT_ARM = {  name = '', label = '', hash_male = '', hash_female = '', collection = '' },
-            ZONE_RIGHT_ARM = {  name = '', label = '', hash_male = '', hash_female = '', collection = '' },
-            ZONE_LEFT_LEG = {  name = '', label = '', hash_male = '', hash_female = '', collection = '' },
-            ZONE_RIGHT_LEG = {  name = '', label = '', hash_male = '', hash_female = '', collection = '' }
+            ZONE_HEAD = { name = '', label = '', hash_m = '', hash_f = '', collection = '' },
+            ZONE_TORSO = { name = '', label = '', hash_m = '', hash_f = '', collection = '' },
+            ZONE_LEFT_ARM = {  name = '', label = '', hash_m = '', hash_f = '', collection = '' },
+            ZONE_RIGHT_ARM = {  name = '', label = '', hash_m = '', hash_f = '', collection = '' },
+            ZONE_LEFT_LEG = {  name = '', label = '', hash_m = '', hash_f = '', collection = '' },
+            ZONE_RIGHT_LEG = {  name = '', label = '', hash_m = '', hash_f = '', collection = '' }
         }
     }
 }
 
-exports('shared_style', ped_style)
+exports('shared_style', ped_styles)
 utils.shared.style = ped_styles
+
+--- Store default ped styles.
+local defaults = utils.tables.deep_copy(ped_styles)
 
 --- @section Local functions
 
---- Function to retreive updated style data
+--- Returns default styles.
+local function get_style_defaults()
+    return defaults
+end
+
+exports('shared_get_style_defaults', get_style_defaults)
+utils.shared.get_style_defaults = get_style_defaults
+
+--- Retreives updated style data.
 --- @param sex: Sex of ped to retrieve correct style.
 local function get_style(sex)
     if not sex then return false end
@@ -234,3 +245,14 @@ end
 
 exports('shared_get_style', get_style)
 utils.shared.get_style = get_style
+
+--- Reset styles to defaults.
+local function reset_styles()
+    print('resetting styles to defaults')
+    ped_styles = utils.tables.deep_copy(defaults)
+    utils.shared.style = ped_styles
+end
+
+
+exports('shared_reset_styles', reset_styles)
+utils.shared.reset_styles = reset_styles
