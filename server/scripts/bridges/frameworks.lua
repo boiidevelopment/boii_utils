@@ -43,7 +43,7 @@ CreateThread(function()
     elseif FRAMEWORK == 'es_extended' then
         fw = exports['es_extended']:getSharedObject()
     elseif FRAMEWORK == 'ox_core' then
-        local file = ('imports/%s.lua'):format(IsDuplicityVersion() and 'server' or 'client')
+        local file = 'lib/init.lua'
         local import = LoadResourceFile('ox_core', file)
         local chunk = assert(load(import, ('@@ox_core/%s'):format(file)))
         chunk()
@@ -300,6 +300,7 @@ local function has_item(_src, item_name, item_amount)
     -- ox_inventory
     if GetResourceState('ox_inventory') == 'started' then
         local count = exports.ox_inventory:Search(_src, 'count', item_name)
+        if item_name:sub(0, 7) == 'weapon_' then item_name = string.upper(item_name) end
         return count ~= nil and count[item_name] >= required_amount
     end
     
@@ -315,6 +316,7 @@ local function has_item(_src, item_name, item_amount)
         return item ~= nil and item.count >= required_amount
     elseif FRAMEWORK == 'ox_core' then
         local count = exports.ox_inventory:Search(_src, 'count', item_name)
+        if item_name:sub(0, 7) == 'weapon_' then item_name = string.upper(item_name) end
         return count ~= nil and count[item_name] >= required_amount
     elseif FRAMEWORK == 'custom' then
         -- Custom framework logic
