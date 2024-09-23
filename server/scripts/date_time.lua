@@ -19,10 +19,7 @@
 --- @usage local time_data = utils.dates.get_timestamp()
 local function get_timestamp()
     local ts = os.time()
-    return {
-        timestamp = ts,
-        formatted = os.date('%Y-%m-%d %H:%M:%S', ts)
-    }
+    return { timestamp = ts, formatted = os.date('%Y-%m-%d %H:%M:%S', ts) }
 end
 
 exports('dates_get_timestamp', get_timestamp)
@@ -33,11 +30,7 @@ utils.dates.get_timestamp = get_timestamp
 --- @return A table containing date, time, and formatted date-time string based on the input timestamp.
 --- @usage local date_data = utils.dates.convert_timestamp(1628759592)
 local function convert_timestamp(timestamp)
-    return {
-        date = os.date('%Y-%m-%d', timestamp),
-        time = os.date('%H:%M:%S', timestamp),
-        formatted = os.date('%Y-%m-%d %H:%M:%S', timestamp)
-    }
+    return { date = os.date('%Y-%m-%d', timestamp), time = os.date('%H:%M:%S', timestamp), formatted = os.date('%Y-%m-%d %H:%M:%S', timestamp) }
 end
 
 exports('dates_convert_timestamp', convert_timestamp)
@@ -148,3 +141,18 @@ end
 
 exports('dates_time_difference_in_seconds', time_difference_in_seconds)
 utils.dates.time_difference_in_seconds = time_difference_in_seconds
+
+--- Convert date string to a more consistent format.
+--- @param date_string string: The date string to convert.
+--- @return string: The formatted date string.
+local function format_date(date_string)
+    local year, month, day = date_string:match("(%d+)-(%d+)-(%d+)")
+    if year and month and day then
+        return string.format("%04d-%02d-%02d", year, month, day)
+    else
+        return date_string
+    end
+end
+
+exports('dates_format_date', format_date)
+utils.dates.format_date = format_date
