@@ -234,8 +234,6 @@ end
 exports('player_play_animation', play_animation)
 utils.player.play_animation = play_animation
 
-
-
 --- Checks if the player is in water.
 --- @function is_player_in_water
 --- @param player number: The player entity.
@@ -279,3 +277,15 @@ end
 
 exports('player_is_player_near_water', is_player_near_water)
 utils.player.is_player_near_water = is_player_near_water
+
+--- Checks if the player has a specific weapon equipped.
+--- @param player_ped The players ped identifier.
+--- @param weapon_hash The weapon hash to check.
+--- @return True if the player has the specified weapon equipped, False otherwise.
+local function has_weapon_equipped(player_ped, weapon_hash)
+    local current_weapon = GetSelectedPedWeapon(player_ped)
+    return current_weapon == weapon_hash
+end
+
+exports('player_has_weapon_equipped', has_weapon_equipped)
+utils.player.has_weapon_equipped = has_weapon_equipped
