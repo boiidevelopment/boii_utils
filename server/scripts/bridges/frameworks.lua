@@ -285,19 +285,25 @@ utils.fw.get_identity_by_id = get_identity_by_id
 --- @usage local has_item = utils.fw.has_item(_src, 'item_name', item_amount)
 local function has_item(_src, item_name, item_amount)
     local player = get_player(_src)
-    if not player then return false end
+    if not player then 
+        print("Player not found:", _src)
+        return false 
+    end
 
     local required_amount = item_amount or 1
     
+    -- boii_inventory
     if GetResourceState('boii_inventory') == 'started' then
         return exports.boii_inventory:has_item(_src, item_name, required_amount)
     end
 
+    -- ox_inventory
     if GetResourceState('ox_inventory') == 'started' then
         local count = exports.ox_inventory:Search(_src, 'count', item_name)
-        return count ~= nil and count >= required_amount
+        return count ~= nil and count[item_name] >= required_amount
     end
     
+    -- Framework-specific logic
     if FRAMEWORK == 'boii_core' then
         return player.has_item(item_name, required_amount)
     elseif FRAMEWORK == 'qb-core' then
@@ -309,7 +315,7 @@ local function has_item(_src, item_name, item_amount)
         return item ~= nil and item.count >= required_amount
     elseif FRAMEWORK == 'ox_core' then
         local count = exports.ox_inventory:Search(_src, 'count', item_name)
-        return count ~= nil and count >= required_amount
+        return count ~= nil and count[item_name] >= required_amount
     elseif FRAMEWORK == 'custom' then
         -- Custom framework logic
     end
@@ -319,6 +325,7 @@ end
 
 exports('fw_has_item', has_item)
 utils.fw.has_item = has_item
+
 
 --- Retrieves an item from the player's inventory.
 --- @param _src Player source identifier.
