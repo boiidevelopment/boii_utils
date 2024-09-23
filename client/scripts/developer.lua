@@ -199,10 +199,3 @@ end
 
 exports('developer_toggle_environment_info', toggle_environment_info)
 utils.developer.toggle_environment_info = toggle_environment_info
-
---- @section Assign local functions
-
-utils.developer.toggle_coords = toggle_coords
-utils.developer.toggle_vehicle_info = toggle_vehicle_info
-utils.developer.toggle_player_info = toggle_player_info
-utils.developer.toggle_environment_info = toggle_environment_info
