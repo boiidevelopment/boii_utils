@@ -43,7 +43,7 @@ CreateThread(function()
     elseif FRAMEWORK == 'es_extended' then
         fw = exports['es_extended']:getSharedObject()
     elseif FRAMEWORK == 'ox_core' then
-        local file = ('imports/%s.lua'):format(IsDuplicityVersion() and 'server' or 'client')
+        local file = 'lib/init.lua'
         local import = LoadResourceFile('ox_core', file)
         local chunk = assert(load(import, ('@@ox_core/%s'):format(file)))
         chunk()
