@@ -28,6 +28,8 @@ CreateThread(function()
         FRAMEWORK = 'es_extended'
     elseif GetResourceState('ox_core') == 'started' then
         FRAMEWORK = 'ox_core'
+    elseif GetResourceState('qbx_core') == 'started' then
+        FRAMEWORK = 'qbx_core'
     end
 
     while not FRAMEWORK do
@@ -46,8 +48,8 @@ CreateThread(function()
         local chunk = assert(load(import, ('@@ox_core/%s'):format(file)))
         chunk()
         fw = Ox
-    elseif FRAMEWORK == 'custom' then
-        --- Custom framework initialization
+    elseif FRAMEWORK == 'qbx_core' then
+        fw = exports.qbx_core
     end
 
     return
@@ -71,8 +73,8 @@ local function get_data(key)
         player_data = fw.GetPlayerData()
     elseif FRAMEWORK == 'ox_core' then
         player_data = fw.GetPlayerData()
-    elseif FRAMEWORK == 'custom' then
-        --- Custom framework logic
+    elseif FRAMEWORK == 'qbx_core' then
+        player = fw:GetPlayer(_src).PlayerData
     end
 
     if not player_data then
@@ -127,8 +129,14 @@ local function get_identity()
             sex = player.gender,
             nationality = 'LS, Los Santos'
         }
-    elseif FRAMEWORK == 'custom' then
-        --- Custom framework logic
+    elseif FRAMEWORK == 'qbx_core' then
+        player_data = {
+            first_name = player.charinfo.firstname,
+            last_name = player.charinfo.lastname,
+            dob = player.charinfo.birthdate,
+            sex = player.charinfo.gender,
+            nationality = player.charinfo.nationality
+        }
     end
     return player_data
 end
@@ -156,8 +164,8 @@ local function get_player_id()
         player_id = player.identifier
     elseif FRAMEWORK == 'ox_core' then
         player_id = player.stateId
-    elseif FRAMEWORK == 'custom' then
-        --- Custom framework logic
+    elseif FRAMEWORK == 'qbx_core' then
+        player_id = player.citizenid
     end
 
     if not player_id then

@@ -28,8 +28,8 @@ CreateThread(function()
         FRAMEWORK = 'es_extended'
     elseif GetResourceState('ox_core') == 'started' then
         FRAMEWORK = 'ox_core'
-    elseif GetResourceState('boii_lua') == 'started' then
-        FRAMEWORK = 'custom'
+    elseif GetResourceState('qbx_core') == 'started' then
+        FRAMEWORK = 'qbx_core'
     end
 
     while not FRAMEWORK do
@@ -48,8 +48,8 @@ CreateThread(function()
         local chunk = assert(load(import, ('@@ox_core/%s'):format(file)))
         chunk()
         fw = Ox
-    elseif FRAMEWORK == 'custom' then
-        --- Custom framework initialization
+    elseif FRAMEWORK == 'qbx_core' then
+        fw = exports.qbx_core
     end
 
     return
@@ -79,8 +79,8 @@ local function get_players()
         players = fw.GetPlayers()
     elseif FRAMEWORK == 'ox_core' then
         players = fw.GetPlayers()
-    elseif FRAMEWORK == 'custom' then
-        -- Custom framework logic
+    elseif FRAMEWORK == 'qbx_core' then
+        players = fw:GetQBPlayers()
     end
     return players
 end
@@ -102,8 +102,8 @@ local function get_player(_src)
         player = fw.GetPlayerFromId(_src)
     elseif FRAMEWORK == 'ox_core' then
         player = fw.GetPlayer(_src)
-    elseif FRAMEWORK == 'custom' then
-        -- Custom framework logic
+    elseif FRAMEWORK == 'qbx_core' then
+        player = fw:GetPlayer(_src)
     end
     return player
 end
@@ -128,8 +128,8 @@ local function get_player_id(_src)
         player_id = player.identifier
     elseif FRAMEWORK == 'ox_core' then
         player_id = player.stateId
-    elseif FRAMEWORK == 'custom' then
-        -- Custom framework logic
+    elseif FRAMEWORK == 'qbx_core' then
+        player_id = player.PlayerData.citizenid
     end
     return player_id
 end
@@ -156,8 +156,9 @@ local function get_id_params(_src)
     elseif FRAMEWORK == 'ox_core' then
         query = 'charId = ? AND userId = ?'
         params = { player.charId, player.userId }
-    elseif FRAMEWORK == 'custom' then
-        -- Custom framework logic
+    elseif FRAMEWORK == 'qbx_core' then
+        query = 'citizenid = ?'
+        params = { player.PlayerData.citizenid }
     end
     return query, params
 end
@@ -192,8 +193,10 @@ local function get_insert_params(_src, data_type, data_name, data)
         columns = {'charId', 'userId', data_type}
         values = '?, ?, ?'
         params = { player.charId, player.userId, json.encode(data) }
-    elseif FRAMEWORK == 'custom' then
-        -- Custom framework logic
+    elseif FRAMEWORK == 'qbx_core' then
+        columns = {'citizenid', data_type}
+        values = '?, ?'
+        params = { player.PlayerData.citizenid, json.encode(data) }
     end
     return columns, values, params
 end
@@ -244,8 +247,15 @@ local function get_identity(_src)
             sex = player.gender,
             nationality = 'LS, Los Santos'
         }
-    elseif FRAMEWORK == 'custom' then
-        -- Custom framework logic
+    elseif FRAMEWORK == 'qbx_core' then
+        local charinfo = player.PlayerData.charinfo
+        player_data = {
+            first_name = charinfo.firstname,
+            last_name = charinfo.lastname,
+            dob = charinfo.birthdate,
+            sex = charinfo.gender,
+            nationality = charinfo.nationality
+        }
     end
     return player_data
 end
@@ -573,8 +583,8 @@ local function get_balances(_src)
         end
     elseif FRAMEWORK == 'ox_core' then  
         balances = exports.ox_inventory:Search(_src, 'count', 'money')
-    elseif FRAMEWORK == 'custom' then
-        -- Custom framework logic
+    elseif FRAMEWORK == 'qbx_core' then
+        balances = player.PlayerData.money
     end
     return balances
 end
@@ -612,8 +622,8 @@ local function get_balance_by_type(_src, balance_type)
         end
     elseif FRAMEWORK == 'ox_core' then  
         balance = balances or 0
-    elseif FRAMEWORK == 'custom' then
-        -- Custom framework logic
+    elseif FRAMEWORK == 'qbx_core' then
+        balance = balances[balance_type] or 0
     end
     return balance
 end
@@ -660,8 +670,8 @@ local function adjust_balance(_src, options)
                         end
                     elseif FRAMEWORK == 'ox_core' then
                         exports.ox_inventory:AddItem(_src, 'money', op.amount)
-                    elseif FRAMEWORK == 'custom' then
-                        -- Custom logic goes here
+                    elseif FRAMEWORK == 'qbx_core' then
+                        player.Functions.AddMoney(op.balance_type, op.amount, options.reason)
                     end
                 elseif op.action == 'remove' then
                     if FRAMEWORK == 'qb-core' then
@@ -674,8 +684,8 @@ local function adjust_balance(_src, options)
                         end
                     elseif FRAMEWORK == 'ox_core' then
                         exports.ox_inventory:RemoveItem(_src, 'money', op.amount)
-                    elseif FRAMEWORK == 'custom' then
-                        -- Custom logic goes here
+                    elseif FRAMEWORK == 'qbx_core' then
+                        player.Functions.RemoveMoney(op.balance_type, op.amount, options.reason)
                     end
                 end
             end
@@ -723,8 +733,8 @@ local function get_player_jobs(_src)
             player_jobs = player.getJob()
         elseif FRAMEWORK == 'ox_core' then
             player_jobs = player.getGroups()
-        elseif FRAMEWORK == 'custom' then
-            -- Custom framework logic here
+        elseif FRAMEWORK == 'qbx_core' then
+            player_jobs = player.PlayerData.job
         end
     end
     return player_jobs
@@ -768,8 +778,11 @@ local function player_has_job(_src, job_names)
             job_found = true
             on_duty_status = player.get('inService')
         end
-    elseif FRAMEWORK == 'custom' then
-        -- Custom framework logic here
+    elseif FRAMEWORK == 'qbx_core' then
+        if utils.tables.table_contains(job_names, player_jobs.name) then
+            job_found = true
+            on_duty_status = player_jobs.onduty
+        end
     end
     return job_found and (not check_on_duty or on_duty_status)
 end
@@ -806,8 +819,10 @@ local function get_player_job_grade(_src, job_id)
         end
     elseif FRAMEWORK == 'ox_core' then
         -- @todo add ox logic
-    elseif FRAMEWORK == 'custom' then
-        -- Custom framework logic goes here.
+    elseif FRAMEWORK == 'qbx_core' then
+        if player_jobs.name == job_id then
+            return player_jobs.grade.level
+        end
     end
 
     print('Job grade not found for player. ' .. _src .. ', Job ID: ' .. job_id)
@@ -851,8 +866,8 @@ local function get_player_job_name(_src)
             job_name = player_jobs.name
         elseif FRAMEWORK == 'es_extended' or FRAMEWORK == 'ox_core' then
             job_name = player_jobs.id
-        elseif FRAMEWORK == 'custom' then
-            -- Custom framework logic here
+        elseif FRAMEWORK == 'qbx_core' then
+            job_name = player_jobs.name
         end
     end
     return job_name
@@ -870,6 +885,8 @@ local function get_shared_job_data(job_id)
         job_details = fw.shared.get_shared_data('jobs', job_id)
     elseif FRAMEWORK == 'qb-core' then
         job_details = fw.Shared.Jobs[job_id]
+    elseif FRAMEWORK == 'qbx_core' then
+        job_details = fw:GetJobs()
     end
     return job_details
 end
@@ -936,8 +953,15 @@ local function adjust_statuses(_src, statuses)
         end
     elseif FRAMEWORK == 'ox_core' then
         -- @todo Add ox core status logic
-    elseif FRAMEWORK == 'custom' then
-        -- Add your own custom logic here
+    elseif FRAMEWORK == 'qbx_core' then
+        for key, mod in pairs(statuses) do
+            if player.Functions.GetMetaData(key) then
+                local current = player.Functions.GetMetaData(key)
+                local new_value = math.min(100, math.max(0, current + (mod.add or 0) - (mod.remove or 0)))
+                player.Functions.SetMetaData(key, new_value)
+                print(string.format("QB-Core: Updated status '%s' for player %d from %.2f to %.2f", key, _src, current, new_value))
+            end
+        end
     end
 end
 
@@ -964,6 +988,8 @@ local function register_item(item, cb)
         fw.RegisterUsableItem(item, function(source)
             cb(source)
         end)
+    elseif FRAMEWORK == 'qbx_core' then
+        fw:CreateUseableItem(item, cb)
     else
         debug_log('warn', 'Function: register_item | Note: Unsupported framework: ' .. tostring(FRAMEWORK))
     end
@@ -1073,8 +1099,14 @@ local function create_skill_tables()
                 CONSTRAINT `FK_%s_users` FOREIGN KEY (`userId`) REFERENCES `users` (`userId`) ON UPDATE CASCADE ON DELETE CASCADE
             );
         ]], 'player_skills', 'player_skills', 'player_skills')
-    elseif FRAMEWORK == 'custom' then
-        -- Add the table schema required for your custom framework here
+    elseif FRAMEWORK == 'qbx_core' then
+        query = string.format([[
+            CREATE TABLE IF NOT EXISTS `%s` (
+                `citizenid` varchar(50) NOT NULL,
+                `skills` json DEFAULT '{}',
+                PRIMARY KEY (`citizenid`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+        ]], 'player_skills')
     end
     MySQL.update(query, {})
 end
@@ -1125,8 +1157,14 @@ local function create_rep_tables()
                 CONSTRAINT `FK_%s_users` FOREIGN KEY (`userId`) REFERENCES `users` (`userId`) ON UPDATE CASCADE ON DELETE CASCADE
             );
         ]], 'player_reputation', 'player_reputation', 'player_reputation')
-    elseif FRAMEWORK == 'custom' then
-        -- Add the table schema required for your custom framework here
+    elseif FRAMEWORK == 'qbx_core' then
+        query = string.format([[
+            CREATE TABLE IF NOT EXISTS `%s` (
+                `citizenid` varchar(50) NOT NULL,
+                `reputation` json DEFAULT '{}',
+                PRIMARY KEY (`citizenid`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+        ]], 'player_reputation')
     end
     MySQL.update(query, {})
 end
@@ -1178,8 +1216,14 @@ local function create_licence_tables()
                 CONSTRAINT `FK_%s_users` FOREIGN KEY (`userId`) REFERENCES `users` (`userId`) ON UPDATE CASCADE ON DELETE CASCADE
             );
         ]], 'player_licences', 'player_licences', 'player_licences')
-    elseif FRAMEWORK == 'custom' then
-        -- Add the table schema required for your custom framework here
+    elseif FRAMEWORK == 'qbx_core' then
+        query = string.format([[
+            CREATE TABLE IF NOT EXISTS `%s` (
+                `citizenid` varchar(50) NOT NULL,
+                `licences` json DEFAULT '{}',
+                PRIMARY KEY (`citizenid`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+        ]], 'player_licences')
     end
     MySQL.update(query, {})
 end
