@@ -35,7 +35,7 @@ CreateThread(function()
     end
     
     if FRAMEWORK == 'boii_core' then
-        fw = exports.boii_core:get_object()
+        fw = exports.boii_core:get()
     elseif FRAMEWORK == 'qb-core' then
         fw = exports['qb-core']:GetCoreObject()
     elseif FRAMEWORK == 'es_extended' then
@@ -178,9 +178,9 @@ end)
 --- @section Callback functions
 
 --- Callback function to check if a player has a required job.
---- @param jobs: A table of job names to check against.
---- @param on_duty: Toggle to only return true if player is on duty.
---- @param cb: Callback function.
+--- @param jobs table: A table of job names to check against.
+--- @param on_duty boolean: Toggle to only return true if player is on duty.
+--- @param cb function: Callback function.
 local function player_has_job(jobs, on_duty, cb)
     utils.callback.cb('boii_utils:sv:player_has_job', { jobs = jobs, on_duty = on_duty }, function(has_job)
         cb(has_job)
