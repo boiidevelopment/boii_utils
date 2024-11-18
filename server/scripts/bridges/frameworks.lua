@@ -300,7 +300,7 @@ local function has_item(_src, item_name, item_amount)
     -- ox_inventory
     if GetResourceState('ox_inventory') == 'started' then
         local count = exports.ox_inventory:Search(_src, 'count', item_name)
-        return count ~= nil and count[item_name] >= required_amount
+        return count ~= nil and count >= required_amount
     end
     
     -- Framework-specific logic
@@ -315,7 +315,7 @@ local function has_item(_src, item_name, item_amount)
         return item ~= nil and item.count >= required_amount
     elseif FRAMEWORK == 'ox_core' then
         local count = exports.ox_inventory:Search(_src, 'count', item_name)
-        return count ~= nil and count[item_name] >= required_amount
+        return count ~= nil and count >= required_amount
     elseif FRAMEWORK == 'custom' then
         -- Custom framework logic
     end
@@ -771,6 +771,11 @@ local function player_has_job(_src, job_names)
     elseif FRAMEWORK == 'custom' then
         -- Custom framework logic here
     end
+
+        -- Log for debugging
+        print(('[DEBUG] Job Check for Source %s | Job Found: %s | On Duty: %s | Check Duty: %s'):format(_src, tostring(job_found), tostring(on_duty_status), tostring(check_on_duty)))
+
+
     return job_found and (not check_on_duty or on_duty_status)
 end
 
@@ -991,26 +996,8 @@ end)
 utils.callback.register('boii_utils:sv:player_has_job', function(_src, data, cb)
     local jobs = data.jobs
     local on_duty = data.on_duty
-    local player_has_job = false
-    if player_has_job(_src, jobs, on_duty) then
-        player_has_job = true
-    else
-        player_has_job = false
-    end
-    cb(player_has_job)
-end)
-
---- Callback for checking if player has the required job
-utils.callback.register('boii_utils:sv:player_has_job', function(_src, data, cb)
-    local jobs = data.jobs
-    local on_duty = data.on_duty
-    local player_has_job = false
-    if player_has_job(_src, jobs, on_duty) then
-        player_has_job = true
-    else
-        player_has_job = false
-    end
-    cb(player_has_job)
+    local has_job = player_has_job(_src, jobs, on_duty)
+    cb(has_job)
 end)
 
 --- Callback for checking if player has the required job grade
@@ -1024,163 +1011,3 @@ utils.callback.register('boii_utils:sv:get_inventory', function(_src, data, cb)
     local inventory = get_inventory(_src)
     cb(inventory)
 end)
-
---- @section Database tables
-
---- Function to create sql table on load if not created already
--- This runs internally meaning it is not a exportable function it simply creates tables required for the utils sections
-local function create_skill_tables()
-    while not FRAMEWORK do
-        Wait(100)
-    end
-    utils.debug.info("Creating skills table if not exists...")
-    local query
-    if FRAMEWORK == 'boii_core' then
-        query = string.format([[
-            CREATE TABLE IF NOT EXISTS `%s` (
-                `unique_id` varchar(255) NOT NULL,
-                `char_id` int(1) NOT NULL DEFAULT 1,
-                `skills` json DEFAULT '{}',
-                CONSTRAINT `fk_%s_players` FOREIGN KEY (`unique_id`, `char_id`)
-                REFERENCES `players` (`unique_id`, `char_id`) ON DELETE CASCADE,
-                PRIMARY KEY (`unique_id`, `char_id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-        ]], 'player_skills', 'player_skills')
-    elseif FRAMEWORK == 'qb-core' then
-        query = string.format([[
-            CREATE TABLE IF NOT EXISTS `%s` (
-                `citizenid` varchar(50) NOT NULL,
-                `skills` json DEFAULT '{}',
-                PRIMARY KEY (`citizenid`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-        ]], 'player_skills')
-    elseif FRAMEWORK == 'es_extended' then 
-        query = string.format([[
-            CREATE TABLE IF NOT EXISTS `%s` (
-                `identifier` varchar(60) NOT NULL,
-                `skills` json DEFAULT '{}',
-                PRIMARY KEY (`identifier`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-        ]], 'player_skills')              
-    elseif FRAMEWORK == 'ox_core' then
-        query = string.format([[
-            CREATE TABLE IF NOT EXISTS `%s` (
-                `charId` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-                `userId` INT UNSIGNED NOT NULL,
-                `skills` json DEFAULT '{}',
-                PRIMARY KEY (`charId`) USING BTREE,
-                KEY `FK_%s_users` (`userId`) USING BTREE,
-                CONSTRAINT `FK_%s_users` FOREIGN KEY (`userId`) REFERENCES `users` (`userId`) ON UPDATE CASCADE ON DELETE CASCADE
-            );
-        ]], 'player_skills', 'player_skills', 'player_skills')
-    elseif FRAMEWORK == 'custom' then
-        -- Add the table schema required for your custom framework here
-    end
-    MySQL.update(query, {})
-end
-create_skill_tables()
-
--- Create sql tables required by rep system
-local function create_rep_tables()
-    while not FRAMEWORK do
-        Wait(100)
-    end
-    utils.debug.info("Creating reputations table if not exists...")
-    local query
-    if FRAMEWORK == 'boii_core' then
-        query = string.format([[
-            CREATE TABLE IF NOT EXISTS `%s` (
-                `unique_id` varchar(255) NOT NULL,
-                `char_id` int(1) NOT NULL DEFAULT 1,
-                `reputation` json DEFAULT '{}',
-                CONSTRAINT `fk_%s_players` FOREIGN KEY (`unique_id`, `char_id`)
-                REFERENCES `players` (`unique_id`, `char_id`) ON DELETE CASCADE,
-                PRIMARY KEY (`unique_id`, `char_id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-        ]], 'player_reputation', 'player_reputation')
-    elseif FRAMEWORK == 'qb-core' then
-        query = string.format([[
-            CREATE TABLE IF NOT EXISTS `%s` (
-                `citizenid` varchar(50) NOT NULL,
-                `reputation` json DEFAULT '{}',
-                PRIMARY KEY (`citizenid`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-        ]], 'player_reputation')
-    elseif FRAMEWORK == 'es_extended' then 
-        query = string.format([[
-            CREATE TABLE IF NOT EXISTS `%s` (
-                `identifier` varchar(60) NOT NULL,
-                `reputation` json DEFAULT '{}',
-                PRIMARY KEY (`identifier`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-        ]], 'player_reputation')              
-    elseif FRAMEWORK == 'ox_core' then
-        query = string.format([[
-            CREATE TABLE IF NOT EXISTS `%s` (
-                `charId` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-                `userId` INT UNSIGNED NOT NULL,
-                `reputation` json DEFAULT '{}',
-                PRIMARY KEY (`charId`) USING BTREE,
-                KEY `FK_%s_users` (`userId`) USING BTREE,
-                CONSTRAINT `FK_%s_users` FOREIGN KEY (`userId`) REFERENCES `users` (`userId`) ON UPDATE CASCADE ON DELETE CASCADE
-            );
-        ]], 'player_reputation', 'player_reputation', 'player_reputation')
-    elseif FRAMEWORK == 'custom' then
-        -- Add the table schema required for your custom framework here
-    end
-    MySQL.update(query, {})
-end
-create_rep_tables()
-
--- Function to create sql table on load if not created already
--- This runs internally meaning it is not a exportable function it simply creates tables required for the utils sections
-local function create_licence_tables()
-    while not FRAMEWORK do
-        Wait(100)
-    end
-    utils.debug.info("Creating licence table if not exists...")
-    local query
-    if FRAMEWORK == 'boii_core' then
-        query = string.format([[
-            CREATE TABLE IF NOT EXISTS `%s` (
-                `unique_id` varchar(255) NOT NULL,
-                `char_id` int(1) NOT NULL DEFAULT 1,
-                `licences` json DEFAULT '{}',
-                CONSTRAINT `fk_%s_players` FOREIGN KEY (`unique_id`, `char_id`)
-                REFERENCES `players` (`unique_id`, `char_id`) ON DELETE CASCADE,
-                PRIMARY KEY (`unique_id`, `char_id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-        ]], 'player_licences', 'player_licences')
-    elseif FRAMEWORK == 'qb-core' then
-        query = string.format([[
-            CREATE TABLE IF NOT EXISTS `%s` (
-                `citizenid` varchar(50) NOT NULL,
-                `licences` json DEFAULT '{}',
-                PRIMARY KEY (`citizenid`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-        ]], 'player_licences')
-    elseif FRAMEWORK == 'es_extended' then 
-        query = string.format([[
-            CREATE TABLE IF NOT EXISTS `%s` (
-                `identifier` varchar(60) NOT NULL,
-                `licences` json DEFAULT '{}',
-                PRIMARY KEY (`identifier`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-        ]], 'player_licences')              
-    elseif FRAMEWORK == 'ox_core' then
-        query = string.format([[
-            CREATE TABLE IF NOT EXISTS `%s` (
-                `charId` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-                `userId` INT UNSIGNED NOT NULL,
-                `licences` json DEFAULT '{}',
-                PRIMARY KEY (`charId`) USING BTREE,
-                KEY `FK_%s_users` (`userId`) USING BTREE,
-                CONSTRAINT `FK_%s_users` FOREIGN KEY (`userId`) REFERENCES `users` (`userId`) ON UPDATE CASCADE ON DELETE CASCADE
-            );
-        ]], 'player_licences', 'player_licences', 'player_licences')
-    elseif FRAMEWORK == 'custom' then
-        -- Add the table schema required for your custom framework here
-    end
-    MySQL.update(query, {})
-end
-create_licence_tables()
