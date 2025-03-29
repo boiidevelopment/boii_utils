@@ -1,0 +1,70 @@
+/* Progress Container */
+.progress_container {
+    position: fixed;
+    bottom: 10vh;
+    z-index: 1002;
+    width: 27vw;
+    height: auto;
+    display: none;
+    font-family: var(--header_font_family);
+    padding: 1vh;
+}
+
+/* Progress Bar */
+.progress_bar {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 1vh;
+    border-radius: var(--border_radius);
+    box-shadow: var(--box_shadow);
+    animation: fade-in 1s ease-in-out;
+}
+
+/* Progress Bar Header */
+.progress_bar_header {
+    display: flex;
+    align-items: center;
+    font-size: 1.2em;
+    margin-bottom: 5px;
+    color: var(--text_colour);
+}
+
+/* Icon within the Progress Bar Header */
+.progress_bar_header i {
+    margin-right: 1vh;
+    margin-left: 0.1vw;
+    padding: 0.1vh;
+}
+
+/* Progress Bar Body */
+.progress_bar_body {
+    width: 100%;
+    height: 0.2vh;
+    background-color: var(--secondary_background);
+    border-radius: var(--border_radius);
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+}
+
+/* Progress Segment */
+.progress_segment {
+    height: 100%;
+    background-color: var(--background);
+    transition: opacity 0.5s linear;
+    border-radius: var(--border_radius);
+}
+
+/* Fade-in Animation */
+@keyframes fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

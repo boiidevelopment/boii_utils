@@ -1,0 +1,71 @@
+.draw_text_container {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    z-index: 1000;
+    align-items: flex-start;
+    padding: 2vh;
+}
+
+.draw_text {
+    border-radius: var(--border_radius);
+    background-color: var(--background);
+    color: var(--text_colour);
+    border: none;
+    box-shadow: var(--box_shadow);
+    animation: fadeIn 2s ease-in-out;
+    padding: 1vh;
+}
+
+.draw_text_header {
+    font-size: 1.5vh;
+    font-weight: bold;
+    margin-bottom: 5px;
+    font-family: var(--header_font_family);
+    display: flex;
+    align-items: center;
+}
+
+.draw_text_header i {
+    padding: 0.1vh;
+    margin-right: 0.3vw;
+}
+
+.draw_text_message {
+    font-size: 1.2vh;
+    font-family: var(--text_font_family);
+}
+
+.key_indicator {
+    height: 2.5vh;
+    width: 2.5vh;
+    margin-right: 0.5vw;
+    font-weight: bold;
+    display: inline-block;
+    border-radius: var(--border_radius);
+    background: var(--secondary_background);
+    box-shadow: var(--box_shadow_inset);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent_colour);
+}
+
+.draw_text_progress_bar {
+    width: 100%;
+    margin-top: 0.5vh;
+    height: 0.2vh;
+    background: var(--secondary_background);
+    border-radius: var(--border_radius);
+    box-shadow: var(--box_shadow);
+}
+
+/* Additional keyframes for fadeIn animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 0.9;
+    }
+}

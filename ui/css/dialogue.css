@@ -1,0 +1,119 @@
+.dialogue_wrapper {
+    position: fixed;
+    bottom: 5vh;
+    left: 0;
+    width: 100%;
+    height: fit-content;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.dialogue_container {
+    background-color: var(--background);
+    border-radius: var(--border_radius);
+    color: var(--text_colour);
+    width: fit-content;
+    padding: 1vh;
+    display: flex;
+    flex-direction: column;
+    animation: fade 2s;
+    position: relative;
+    box-shadow: var(--box_shadow);
+    font-family: var(--text_font_family);
+}
+
+.dialogue_header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.3);
+    margin-bottom: 1vh;
+}
+
+.dialogue_header_content {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1vh;
+}
+
+.dialogue_header_image {
+    width: 3vh;
+    height: 3vh;
+    margin-right: 0.5vh;
+}
+
+.dialogue_header_text {
+    font-weight: bold;
+    margin-left: 5px;
+    font-family: var(--header_font_family);
+}
+
+.dialogue_header_icon {
+    font-weight: bold;
+    margin-left: 5px;
+    margin-right: 5px;
+    color: var(--accent_colour)
+}
+
+.dialogue_close_button {
+    font-size: 1.2rem;
+    color: rgba(0, 0, 0, 0.3);
+    margin-bottom: 1vh;
+}
+
+.dialogue_close_button:hover {
+    cursor: pointer;
+    color: rgba(0, 0, 0, 0.5);
+}
+
+.dialogue_response {
+    margin-bottom: 1vh;
+    background-color: var(--secondary_background);
+    padding: 1vh;
+    border-radius: var(--border_radius);
+    display: flex;
+    flex-direction: column;
+}
+
+.dialogue_options {
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+    position: relative;
+    padding-top: 1vh;
+}
+
+.dialogue_options::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    height: 2px;
+    background-color: rgba(0, 0, 0, 0.3);
+    width: 100%;
+}
+
+.dialogue_option {
+    background-color: var(--secondary_background);
+    padding: 1vh;
+    border-radius: var(--border_radius);
+    cursor: pointer;
+    transition: background-color 0.3s;
+    display: flex;
+    align-items: center;
+    flex-grow: 1;
+}
+
+.dialogue_option:hover {
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.dialogue_option i {
+    color: var(--accent_colour);
+    width: 10%;
+}
+
+.dialogue_vignette {
+    opacity: 0.1;
+}

@@ -1,0 +1,96 @@
+#notify_container {
+    position: fixed;
+    top: 12vh;
+    right: 1vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 40vh;
+    width: 30vw;
+    max-width: 30vw;
+    padding: 1vh;
+    overflow-y: hidden;
+    z-index: 1000;
+    gap: 1.5vh;
+}
+
+#notify_container:hover {
+    cursor: grab;
+}
+
+.notification {
+    background-color: var(--background);
+    color: #333;
+    border-radius: var(--border_radius);
+    box-shadow: var(--box_shadow);
+    color: var(--text_colour);
+    text-align: left;
+    transition: opacity 0.5s ease, transform 0.5s ease;
+    font-family: var(--text_font_family);
+    width: fit-content;
+    max-width: 95%;
+    min-height: 4.5vh;
+    position: relative;
+    border: none;
+    padding: 1vh;
+    border: 2px solid rgba(0, 0, 0, 0.5);
+}
+
+.notification_content {
+    display: flex;
+    align-items: flex-start;
+}
+
+.notification_icon {
+    font-size: 1.6vh;
+    padding: 0.1vh;
+    margin-right: 0.3vw;
+    flex-shrink: 0;
+}
+
+.notification_header_text {
+    font-size: 1.3vh;
+    font-weight: bold;
+    margin-top: -0.15vh;
+}
+
+.notification_message {
+    font-size: 1.3vh;
+    word-wrap: break-word;
+    flex-grow: 1;
+    margin-top: 0.1vh;
+}
+
+.notification_progress_bar {
+    height: 0.2vh;
+    background-color: var(--secondary_background);
+    border: none;
+    border-radius: var(--border_radius);
+    margin-top: 0.5vh;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 0.9; transform: translateY(0); }
+}
+
+.notification {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.notification_progress_segment {
+    background-color: var(--accent_colour);
+    height: 100%;
+    opacity: 1;
+    transition: opacity 1s linear;
+}
+
+.notification_progress_segment:first-child {
+    border-top-left-radius: var(--border_radius);
+    border-bottom-left-radius: var(--border_radius);
+}
+
+.notification_progress_segment:last-child {
+    border-top-right-radius: var(--border_radius);
+    border-bottom-right-radius: var(--border_radius);
+}

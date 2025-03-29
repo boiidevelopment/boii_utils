@@ -1,0 +1,34 @@
+/* 
+    Import fonts:
+    You can import additional fonts here  
+*/
+@import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Kanit&display=swap');
+
+/* 
+    Root settings:
+    Contains colour palette settings for ui.
+*/
+:root {
+    /* Fonts */
+    --header_font_family: 'Kanit';
+    --text_font_family: 'Roboto';
+
+    /* Border Radius */
+    --border_radius: 3px;
+
+    /* Main Palette */
+    --background: #141414;
+    --secondary_background: #1f1e1e;
+    --tertiary_background: #323030;
+    --text_colour: #fff;
+    --secondary_text_colour: #b4b4b4;
+    --tertiary_text_colour: #666;
+    --accent_colour: #4dcbc2;
+    --secondary_accent_colour: #b53232;
+    --tertiary_accent_colour: orange;
+    --box_shadow: 0 2px 3px rgba(0, 0, 0, 0.8);
+    --box_shadow_two_tone: 3px 5px 5px #0d0c0c, -4px -5px 6px #4dcbc2;
+    --box_shadow_inset: inset 0px 1px 2px 0px rgba(0, 0, 0, 0.5), inset -1px -1px rgba(0, 0, 0, 0.5);
+    --text_shadow: -1px -1px 0px rgba(31, 30, 30, 1), 1px -1px 0px rgba(31, 30, 30, 1), -1px 1px 0px rgba(31, 30, 30, 1), 1px 1px 0px rgba(31, 30, 30, 1);
+}
