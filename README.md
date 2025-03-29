@@ -99,4 +99,4 @@ https://docs.boii.dev/fivem-resources/free-resources/boii_utils
 
 ## 📩 Support
 
-https://discord.gg/boiidevelopment
+[https://discord.gg/boiidevelopment](https://discord.gg/MUckUyS5Kq)
