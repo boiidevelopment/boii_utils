@@ -2,8 +2,6 @@
 
 The library is devided into useful `modules` you can import into your resource through the export `exports.boii_utils:get(...)`.
 
-A CFX friendly require function has been included into the `init.lua` to handle overriding the default require function.
-
 # Available Modules
 
 Below is a quick list of all current available modules and a brief description of what the module can do.
@@ -49,21 +47,11 @@ They also provide a solution for supporting servers that lack certain mechanics.
 
 # Importing Modules
 
-You can use the following methods in client/server/shared files to access the modules:
-
-## Exports
-
-```lua
-local CALLBACKS <const> = exports.boii_utils:get("modules.callbacks")
-```
-
-## get(...)
-
-Adding `@boii_utils/init.lua` into your `fxmanifest.lua` will allow access to the librarys `get(...)` function.
-You can add this into any context where it is required however for ease of use `shared_script "@boii_utils/init.lua"` is usually the best path.
+To keep things more simple for end users all module importing is handled through exports.
+For example: 
 
 ```lua
-local CALLBACKS <const> = get("modules.callbacks")
+local CALLBACKS <const> = exports.boii_utils:get("modules.callbacks") -- Gets callbacks module
 ```
 
 # Using Modules
@@ -114,6 +102,7 @@ exports.boii_utils:get("modules.items") -- Item Registry
 exports.boii_utils:get("modules.keys") -- Key Management
 exports.boii_utils:get("modules.licences") -- Licence System
 exports.boii_utils:get("modules.maths") -- Extended Maths Functions
+exports.boii_utils:get("modules.methods") -- Attaching and triggering custom logic on events
 exports.boii_utils:get("modules.player") -- Player Utilities
 exports.boii_utils:get("modules.requests") -- Request Handlers
 exports.boii_utils:get("modules.strings") -- Extended String Functions
