@@ -20,10 +20,6 @@ Use just what you need, ignore the rest, and regain a little sanity.
 
 ## Why use boii_utils?
 
-Because you've rebuilt the same helper functions so many times, they deserve their own therapy arc.
-Because every script starts with "utils.lua" and ends with tears.
-Because this library exists to do the boring stuff, so you can focus on the fun, broken, overambitious features your server totally needs.
-
 - **Simplifies Scripting:** Functions that just work, without needing a 12-tab Stack Overflow deep dive.
 - **Prebuilt Systems:** Fully modular. Plug in, power up, and pretend you built it from scratch.
 - **Reduces Dev Load:** Spend less time writing boilerplate and more time watching your players ignore your server rules.
