@@ -14,7 +14,7 @@ For more detailed instructions on whats available in each module view **5-API-Re
 Bridges allow seamless integration with multiple resources through a single API, reducing the need for writing framework-specific code.  
 They detect available resources and route accordingly, making scripts more flexible and future-proof.
 
-- **Framework Bridge:** Supported by default; `"esx", "boii_core", "nd", "ox", "qb", "qbx"`.
+- **Framework Bridge:** Supported by default; `"boii_core", "esx", "nd", "ox", "qb", "qbx"`.
 - **DrawText UI Bridge:** Supported by default; `"default", "boii", "esx", "okok", "ox", "qb"`.
 - **Notifications Bridge:** Supported by default; `"default", "boii", "esx", "okok", "ox", "qb"`.
 
