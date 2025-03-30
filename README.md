@@ -1,6 +1,6 @@
 # BOII Developer Utility Library (v2.0)
 
-![utils_thumb](https://github.com/user-attachments/assets/ba90edbe-a318-4282-bfe2-3987607d4aa4)
+![utils_thumb](https://github.com/user-attachments/assets/e80578e0-42a6-499d-93fb-1eec1716f196)
 
 ## Overview
 
@@ -92,22 +92,22 @@ You know the drill.
 
 Full setup guide: `docs/2-Installation.md`.
 
-
 ## Dependencies
 
 - **[OxMySQL](https://github.com/overextended/oxmysql/releases)**
 
 ## License
 
-Released under the **MIT License**.  
-Yes, **MIT**. That means it’s free, open-source, and yours to build with — but **not** to resell.  
+Released under the MIT License.
+That means it’s free, open-source, and yours to use, modify, sell, or build on — just don’t remove the license or the credit.
+You’re welcome to profit from it, but let’s keep things respectful: don’t act like you wrote it all yourself.
 
 ## Contributing
 
 Got code? Great. Got opinions? Even better.
 
 If you’ve written something useful, spotted something broken, or just want eternal internet glory *(or shame)*, submit a pr.
-We welcome contributions, improvements, fixes, rants, and clever feature requests.
+We welcome contributions, improvements, fixes, and clever feature requests.
 
 You can also reach out through Discord if you would prefer.
 
