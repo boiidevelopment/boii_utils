@@ -99,7 +99,7 @@ Full setup guide: `docs/2-Installation.md`.
 ## License
 
 Released under the MIT License.
-That means it’s free, open-source, and yours to use, modify, sell, or build on — just don’t remove the license or the credit.
+That means it’s free, open-source, and yours to use, modify, or build on — just don’t remove the license or the credit.
 You’re welcome to profit from it, but let’s keep things respectful: don’t act like you wrote it all yourself.
 
 ## Contributing
