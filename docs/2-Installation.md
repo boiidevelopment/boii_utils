@@ -10,7 +10,7 @@ Before installing the library into your server please make sure you have the fol
 
 ## Downloading The Library
 
-- **[BDTK](https://github.com/boiidevelopment/boii_utils/releases)**
+- **[boii_utils](https://github.com/boiidevelopment/boii_utils/releases)**
 
 ## Installation
 
