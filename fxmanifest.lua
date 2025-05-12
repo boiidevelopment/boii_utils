@@ -9,7 +9,7 @@
                                                     
 ---------------------------                                              
       Utility Library
-          V2.0.0              
+          V2.1.0              
 ---------------------------
 ]]
 
@@ -17,7 +17,7 @@ fx_version "cerulean"
 games { "gta5", "rdr3" }
 
 name "boii_utils"
-version "2.0.0"
+version "2.1.0"
 description "Developer Utility Library."
 author "boiidevelopment"
 repository "https://github.com/boiidevelopment/boii_utils"
@@ -35,6 +35,7 @@ files {
 
 server_script "@oxmysql/lib/MySQL.lua" -- OxMySQL
 
+shared_script "env.lua"
 shared_script "init.lua"
 server_script "users.lua" -- Required! user accounts handle permissions for commands etc.. dont remove.
 
