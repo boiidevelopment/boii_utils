@@ -1,150 +1,107 @@
---- @script Utils Initialization
---- Initializes framework bridge, loads and caches relevant modules.
+--- @script init.lua
+--- Handles utils initilization.
 
---- @section Environment
+--- @section Helpers
 
-ENV = setmetatable({
-    --- @section Cache
+--- Print logs
+local function log_err(fmt, ...) print(("^1[UTILS]^7 " .. fmt):format(...)) end -- Error
+local function log_ok (fmt, ...) print(("^2[UTILS]^7 " .. fmt):format(...)) end -- Ok
 
-    DATA = {},
-    MODULES = {},
+--- Builds relative paths 
+local function build_path(tpl, name)
+    return tpl:find("%%s") and tpl:format(name) or ("%s/%s.lua"):format(tpl, name)
+end
 
-    --- @section Natives
+--- @section Resource Auto Detection
 
-    RESOURCE_NAME = GetCurrentResourceName(),
-    IS_SERVER = IsDuplicityVersion(),
+--- Auto detects ui/framework resources.
+--- @param flag_key string: ENV flag key e.g. "AUTO_DETECT_FRAMEWORK"
+--- @param option_key string: ENV option key e.g. "FRAMEWORK"
+--- @param list table: ENV resource table e.g. "ENV.FRAMEWORKS"
+--- @param default_value string: Convar default value "standalone"
+--- @param label string: Optional log string for detected resource e.g. "Framework" would log "Framework detected: boii_core".
+local function auto_detect(flag_key, option_key, list, default_value, log)
+    if not ENV[flag_key] or ENV[option_key] ~= default_value then return end
+    for _, res in ipairs(list) do
+        if GetResourceState(res.resource) == "started" then
+            ENV[option_key] = res.key
+            if log then log_ok("%s detected: %s", log, res.resource) end
+            return
+        end
+    end
+end
 
-    --- @section User Registry
+auto_detect("AUTO_DETECT_FRAMEWORK", "FRAMEWORK", ENV.FRAMEWORKS, "standalone", "Framework")
+auto_detect("AUTO_DETECT_DRAWTEXT", "DRAWTEXT", ENV.DRAWTEXTS, "default")
+auto_detect("AUTO_DETECT_NOTIFY", "NOTIFY", ENV.NOTIFICATIONS, "default")
 
-    DEFFERAL_UPDATE_MESSAGES = GetConvar("utils:deferals_updates", "true") == "true", -- Defferal connection messages, disable with convars.
-    UNIQUE_ID_PREFIX = GetConvar("utils:unique_id_prefix", "USER_"), -- Prefix is combined with digits below to create a unique id e.g, "USER_12345"
-    UNIQUE_ID_CHARS = GetConvar("utils:unique_id_chars", "5"), -- Amount of random characters to use after prefix e.g, "ABC12"
+--- @section Safe Require Function
 
-    --- @section Framework Bridge
+--- Quick ref to env path table
+local p = ENV.INTERNAL_PATHS
 
-    --- Supported Frameworks: If you have changed the name of your core resource folder update it here.
-    FRAMEWORKS = {
-        -- If you use multiple cores you can adjust the priority loading order by changed the arrangement here.
-        { key = "esx", resource = "es_extended" },
-        { key = "boii", resource = "boii_core" },
-        { key = "nd", resource = "ND_Core" },
-        { key = "ox", resource = "ox_core" },
-        { key = "qb", resource = "qb-core" },
-        { key = "qbx", resource = "qbx_core" },
-    },
-    AUTO_DETECT_FRAMEWORK = true, -- If true FRAMEWORK convar setting will be overwritten with auto detection.
-    FRAMEWORK = GetConvar("utils:framework", "standalone"), -- This should not be changed, set up convars correctly and change there if needed.
-
-    --- @section UI Bridges
-
-    --- Supported DrawText UIs: If you have changed the name of a resource folder update it here.
-    DRAWTEXTS = {
-        -- If you use multiple drawtext resource you can adjust the priority loading order by changed the arrangement here.
-        { key = "boii", resource = "boii_ui" },
-        { key = "esx", resource = "es_extended" },
-        { key = "okok", resource = "okokTextUi" },
-        { key = "ox", resource = "ox_lib" },
-        { key = "qb", resource = "qb-core" }
-    },
-    AUTO_DETECT_DRAWTEXT = true, -- If true DRAWTEXT convar setting will be overwritten with auto detection.
-    DRAWTEXT = GetConvar("utils:drawtext_ui", "default"), -- This should not be changed, set up convars correctly and change there if needed.
-
-    --- Supported Notifys: If you have changed the name of a resource folder update it here.
-    NOTIFICATIONS = {
-        -- If you use multiple notify resources you can adjust the priority loading order by changed the arrangement here.
-        { key = "boii", resource = "boii_ui" },
-        { key = "esx", resource = "es_extended" },
-        { key = "okok", resource = "okokNotify" },
-        { key = "ox", resource = "ox_lib" },
-        { key = "qb", resource = "qb-core" }
-    },
-    AUTO_DETECT_NOTIFY = true, -- If true NOTIFY convar setting will be overwritten with auto detection.
-    NOTIFY = GetConvar("utils:notify", "default"), -- This should not be changed, set up convars correctly and change there if needed.
-
-    --- @section Timers
-
-    CLEAR_EXPIRED_COOLDOWNS = GetConvar("utils:clear_expired_cooldowns", "5"), -- Timer to clear expired cooldowns from cache in mins; default 5mins.
-
-}, { __index = _G })
-
---- @section Resource Detection
-
---- Framework auto detection if `AUTO_DETECT_FRAMEWORK = true` or if convar is not explicity set.
-if ENV.AUTO_DETECT_FRAMEWORK and ENV.FRAMEWORK == "standalone" then
-
-    --- Detects current running framework if not started falls back to standalone.
-    local function detect_framework()
-        for _, res in ipairs(ENV.FRAMEWORKS) do
-            if GetResourceState(res.resource) == "started" then
-                print("^2Framework Bridge:^7 Server is running ".. res.resource..'. ENV.FRAMEWORK has been set accordingly.')
-                return res.key
+--- Universal cached loader
+--- @param key string: String name for module to load e.g. Internal: "modules.core" | "data.jobs", External: "your_resource:path.to.file"
+--- @return table|nil
+function get(key)
+    local resource, rel_path
+    if key:find(":") then
+        resource, rel_path = key:match("^([^:]+):(.+)$")
+        if not resource or not rel_path then log_err("bad key %s", key) return end
+        rel_path = rel_path:gsub("%.", "/")
+        if not rel_path:match("%.lua$") then rel_path = rel_path .. ".lua" end
+    else
+        local prefix, name = key:match("^(%w+)%.(.+)$")
+        if not (prefix and p[prefix]) then log_err("bad key %s", key) return end
+        resource = ENV.RESOURCE_NAME
+        rel_path = build_path(p[prefix], name)
+        if prefix == "modules" then
+            local tries = { rel_path, build_path(p.ui_bridge, name) }
+            if name == "core" and ENV.FRAMEWORK ~= "standalone" then
+                tries[#tries + 1] = build_path(p.fw_bridge, ENV.FRAMEWORK)
+            end
+            for _, path_try in ipairs(tries) do
+                if LoadResourceFile(resource, path_try) then
+                    rel_path = path_try
+                    break
+                end
             end
         end
-        return "standalone"
     end
 
-    ENV.FRAMEWORK = detect_framework()
+    local cache_key = ("%s:%s"):format(resource, rel_path)
+    if ENV.CACHE[cache_key] then return ENV.CACHE[cache_key] end
+
+    local max_tries, wait_ms = 20, 100
+    local tries = 0
+    local state = GetResourceState(resource)
+    while state == "starting" and tries < max_tries do
+        Citizen.Wait(wait_ms)
+        tries = tries + 1
+        state = GetResourceState(resource)
+    end
+    if state ~= "started" then log_err("resource not started: %s (key %s)", resource, key) return end
+
+    local text = LoadResourceFile(resource, rel_path)
+    if not text then log_err("file not found: %s/%s", resource, rel_path) return end
+    local chunk, err = load(text, ("@@%s/%s"):format(resource, rel_path), "t", _G)
+    if not chunk then log_err("compile error in %s: %s", rel_path, err) return end
+    local ok, result = pcall(chunk)
+    if not ok then log_err("runtime error in %s: %s",  rel_path, result) return end
+    if type(result) ~= "table" then log_err("module did not return table: %s", rel_path) return end
+
+    ENV.CACHE[cache_key] = result
+    return result
 end
 
---- Auto-detects the currently running DrawText UI resource if `AUTO_DETECT_DRAWTEXT = true` or if convar is not explicitly set.
-if ENV.AUTO_DETECT_DRAWTEXT and ENV.DRAWTEXT == "default" then
+--- Replace global require with cfx safe "get".
+_G.require = get
 
-    --- Detects the active DrawText UI resource if not found, falls back to default.
-    local function detect_drawtext()
-        for _, res in ipairs(ENV.DRAWTEXTS) do
-            if GetResourceState(res.resource) == "started" then
-                return res.key
-            end
-        end
-        return "default"
-    end
-
-    ENV.DRAWTEXT = detect_drawtext()
-end
-
---- Auto-detects the currently running Notify resource if `AUTO_DETECT_NOTIFY = true` or if convar is not explicitly set.
-if ENV.AUTO_DETECT_NOTIFY and ENV.NOTIFY == "default" then
-
-    --- Detects the active Notify resource if not found, falls back to default.
-    local function detect_notify()
-        for _, res in ipairs(ENV.NOTIFICATIONS) do
-            if GetResourceState(res.resource) == "started" then
-                return res.key
-            end
-        end
-        return "default"
-    end
-
-    ENV.NOTIFY = detect_notify()
-end
-
---- Unified function to load modules or data based on a prefixed name.
---- @param name string: Prefixed name to load, e.g., "modules.core" or "data.licenses".
-function get(name)
-    local prefix, clean_name = name:match("^(%w+)%.(.+)$")
-    if not prefix or not clean_name then print(("[ERROR] Invalid name format: %s"):format(name)) return nil end
-    local handlers = {
-        data = {env = ENV.DATA, paths = {"lib/data/%s.lua"}},
-        modules = {env = ENV.MODULES, paths = {"lib/modules/%s.lua", "lib/bridges/ui/%s.lua"}}
-    }
-    if clean_name == "core" and ENV.FRAMEWORK ~= "standalone" then
-        handlers.modules.paths[#handlers.modules.paths + 1] = ("lib/bridges/frameworks/%s.lua"):format(ENV.FRAMEWORK)
-    end
-    local handler = handlers[prefix]
-    if not handler then print(("[ERROR] Unknown prefix: %s"):format(prefix)) return nil end
-    if handler.env[name] then return handler.env[name] end
-    for _, path in ipairs(handler.paths) do
-        local content = LoadResourceFile(GetCurrentResourceName(), path:format(clean_name))
-        if content then
-            local fn, err = load(content, ("@@%s/%s"):format(GetCurrentResourceName(), path:format(clean_name)), "t", _G)
-            if not fn then print(("[ERROR] Load error in %s: %s"):format(clean_name, err)) return nil end
-            local success, result = pcall(fn)
-            if not success then print(("[ERROR] Execution error in %s: %s"):format(clean_name, result)) return nil end
-            handler.env[name] = result
-            return result
-        end
-    end
-    print(("[ERROR] File not found for %s in any specified path."):format(name))
-end
-
+--- Exports
+exports("require", get)
 exports("get", get)
+
+--- @section Dot Access Helpers
+
+ENV.DATA = setmetatable({}, { __index = function(_, k) return get("data." .. k) end })
+ENV.MODULES = setmetatable({}, { __index = function(_, k) return get("modules." .. k) end })
