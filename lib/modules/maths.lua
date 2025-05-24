@@ -160,8 +160,38 @@ local function linear_regression(points)
     end
     local slope = (n * sum_xy - sum_x * sum_y) / (n * sum_xx - sum_x * sum_x)
     local intercept = (sum_y - slope * sum_x) / n
-    return {slope = slope, intercept = intercept}
+    return { slope = slope, intercept = intercept }
 end
+
+--- Selects a random choice from a mapping of options with weights.
+--- @param map Table of weighted options.
+--- @return The chosen option
+local function weighted_choice(map)
+    local total = 0
+    for _, w in pairs(map) do
+        if w > 0 then total = total + w end
+    end
+    if total == 0 then return nil end
+    local thresh = math.random(total)
+    local cumulative = 0
+    for key, w in pairs(map) do
+        if w > 0 then
+            cumulative = cumulative + w
+            if thresh <= cumulative then
+                return key
+            end
+        end
+    end
+end
+
+--- Returns a random float between min and max (inclusive).
+--- @param min number
+--- @param max number
+--- @return number
+local function random_between(min, max)
+    return min + math.random() * (max - min)
+end
+
 
 --- @section Function Assignment
 
@@ -180,6 +210,8 @@ maths.median = median
 maths.mode = mode
 maths.standard_deviation = standard_deviation
 maths.linear_regression = linear_regression
+maths.weighted_choice = weighted_choice
+maths.random_between = random_between
 
 --- @section Exports
 
@@ -198,5 +230,7 @@ exports('median', median)
 exports('mode', mode)
 exports('standard_deviation', standard_deviation)
 exports('linear_regression', linear_regression)
+exports('weighted_choice', weighted_choice)
+exports('random_between', random_between)
 
 return maths
