@@ -15,8 +15,8 @@ local function random_string(length)
     local result = {}
 
     for _ = 1, length do
-        local randomChar = chars:sub(math.random(1, #chars), math.random(1, #chars))
-        table.insert(result, randomChar)
+        local r_char = chars:sub(math.random(1, #chars), math.random(1, #chars))
+        table.insert(result, r_char)
     end
 
     return table.concat(result)
@@ -66,6 +66,22 @@ local function format_snake_case(str, case_type)
     return table.concat(parts, " ")
 end
 
+--- Checks if a string starts with a given substring.
+--- @param str string
+--- @param start string
+--- @return boolean
+local function starts_with(str, start)
+    return str:sub(1, #start) == start
+end
+
+--- Checks if a string ends with a given substring.
+--- @param str string
+--- @param ending string
+--- @return boolean
+local function ends_with(str, ending)
+    return ending == "" or str:sub(-#ending) == ending
+end
+
 --- @section Function Assignments
 
 strings.capitalize = capitalize
@@ -73,6 +89,8 @@ strings.random_string = random_string
 strings.split = split
 strings.trim = trim
 strings.format_snake_case = format_snake_case
+strings.starts_with = starts_with
+strings.ends_with = ends_with
 
 --- @section Exports
 
@@ -81,5 +99,7 @@ exports('random_string', random_string)
 exports('split', split)
 exports('trim', trim)
 exports('format_snake_case', format_snake_case)
+exports('starts_with', starts_with)
+exports('ends_with', ends_with)
 
 return strings
