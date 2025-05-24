@@ -43,12 +43,36 @@ local function trim(str)
     return str:match("^%s*(.-)%s*$")
 end
 
+--- Converts a snake_case string to a readable string.
+--- @param str string: The snake_case string.
+--- @param case_type string: "normal" | "title" | "upper"
+--- @return string
+local function format_snake_case(str, case_type)
+    local parts = {}
+    for word in string.gmatch(str, "[^_]+") do
+        table.insert(parts, word)
+    end
+
+    if case_type == "title" then
+        for i = 1, #parts do
+            parts[i] = parts[i]:sub(1,1):upper() .. parts[i]:sub(2):lower()
+        end
+    elseif case_type == "upper" then
+        for i = 1, #parts do
+            parts[i] = parts[i]:upper()
+        end
+    end
+
+    return table.concat(parts, " ")
+end
+
 --- @section Function Assignments
 
 strings.capitalize = capitalize
 strings.random_string = random_string
 strings.split = split
 strings.trim = trim
+strings.format_snake_case = format_snake_case
 
 --- @section Exports
 
@@ -56,5 +80,6 @@ exports('capitalize', capitalize)
 exports('random_string', random_string)
 exports('split', split)
 exports('trim', trim)
+exports('format_snake_case', format_snake_case)
 
 return strings
