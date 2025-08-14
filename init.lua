@@ -105,3 +105,11 @@ exports("get", get)
 
 ENV.DATA = setmetatable({}, { __index = function(_, k) return get("data." .. k) end })
 ENV.MODULES = setmetatable({}, { __index = function(_, k) return get("modules." .. k) end })
+
+--- @section Compat
+
+exports("get_utils", function()
+    log_err(("Legacy Call: 'get_utils' was removed in v2.0"))
+    log_err("Download v1.8.7 (last version with get_utils): https://github.com/boiidevelopment/boii_utils/releases/tag/v1.8.7")
+    return {}
+end)
